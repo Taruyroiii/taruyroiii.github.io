@@ -1,0 +1,15 @@
+{
+    "packages": [
+        "sqlite3",
+        "matplotlib",
+        "scikit-learn"
+    ],
+    "files": {
+        "{DOMAIN}": "http://localhost:5500/",
+        "{PATH}": "",
+        "{VERSION}": "",
+        "{FROM}": "{DOMAIN}/{PATH}/{VERSION}",
+        "{TO}": "./datasets/",
+        "{FROM}/parkinsons.data": "{TO}"
+    }
+}

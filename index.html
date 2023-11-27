@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SMOTE Modification</title>
+        <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+        <link rel="stylesheet" href="main.css"/>
+        <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css"/>
+        <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+    </head>
+    <body>
+        <script type="py" src="./main.py" config="./pyscript.json" target="output"></script>
+        <h1>Parameters</h1>
+        <div class="wrapper">
+            <div class="parameters">
+                <div class="name">Dataset Characteristics</div>
+                <div class="parameter-group">
+                    <div class="parameter">
+                        <div class="name">Dataset Name</div>
+                        <input id="input-dataset-name" type="text" placeholder="Dataset Name" value="OXFORD PARKINSON'S DISEASE"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Dimensions</div>
+                        <input id="input-dimensions" type="number" placeholder="Dimensions" min="2" value="22"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Dataset Start Index</div>
+                        <input id="input-data-start-index" type="number" placeholder="Dataset Start Index" value="0"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Dataset End Index</div>
+                        <input id="input-data-end-index" type="number" placeholder="Dataset End Index" value="-1"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Correct Label Index</div>
+                        <input id="input-correct-label-index" type="number" placeholder="Correct Label Index" value="-1"/>
+                    </div>
+                </div>
+                <div class="name">Scatter Plot Properties</div>
+                <div class="parameter-group">
+                    <div class="parameter">
+                        <div class="name">Plot Feature X Axis</div>
+                        <input id="input-plot-f1-index" type="number" placeholder="Plot Feature X Axis" value="18"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Feature X Name</div>
+                        <input id="input-plot-f1-name" type="text" placeholder="Feature X Name" value="spread1"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Plot Feature Y Axis</div>
+                        <input id="input-plot-f2-index" type="number" placeholder="Plot Feature Y Axis" value="19"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Feature Y Name</div>
+                        <input id="input-plot-f2-name" type="text" placeholder="Feature Y Name" value="spread2"/>
+                    </div>
+                </div>
+                <div class="name">Simulation Settings</div>
+                <div class="parameter-group">
+                    <div class="parameter">
+                        <div class="name">Labels/Centers</div>
+                        <input id="input-centers" type="number" placeholder="Labels/Centers" min="2" value="2"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Test/Train Ratio</div>
+                        <input id="input-test-train-ratio" type="number" placeholder="Test/Train Ratio" step="0.05" min="0.00" max="1.00" value="0.2"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Classification Runs</div>
+                        <input id="input-test-runs" type="number" placeholder="Classification Runs" min="1" value="1000"/>
+                    </div>
+                </div>
+                <!--
+                    <input type="file" id="input-data"/>
+                -->
+                <button py-click="run_simulation" id="run-simulation" onclick="
+                    this.disabled = true;
+                    this.innerHTML = 'Running...';
+                ">Run Simulation</button>
+            </div>
+        </div>
+        <h1>Output</h1>
+        <div class="wrapper">
+            <div class="output-wrapper">
+                <div id="matplotlib-output-imbalanced"></div>
+                <div id="evaluation-output-imbalanced"></div>
+            </div>
+            <div class="output-wrapper">
+                <div id="matplotlib-output-base-smote"></div>
+                <div id="evaluation-output-base-smote"></div>
+            </div>
+            <div class="output-wrapper">
+                <div id="matplotlib-output-heron-centroid-smote"></div>
+                <div id="evaluation-output-heron-centroid-smote"></div>
+            </div>
+        </div>
+        <div id="output"></div>
+    </body>
+</html>
