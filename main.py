@@ -87,6 +87,7 @@ async def read_parameters():
 
     # FILE
     file = open(filePath, newline = '')
+    grouped_data = [ []*centers for i in range(centers)]
 
 ##################### CUSTOM DATA READ #####################
 
@@ -104,8 +105,14 @@ async def processFile(file_input):
 ##################### RAW DATA READ #####################
 
 async def load_data(preset_mode = True):
-    global file
-    global grouped_data
+    global file, grouped_data, minority, majority, train_counts, test_counts, train_data, test_data
+    
+    minority = []
+    majority = []
+    train_counts = []
+    test_counts = []
+    train_data = []
+    test_data = []
 
     if preset_mode:
         file = open(filePath, newline = '')
@@ -544,6 +551,12 @@ async def run_simulation(event):
     document.getElementById("matplotlib-output-imbalanced").innerHTML = ""
     document.getElementById("matplotlib-output-base-smote").innerHTML = ""
     document.getElementById("matplotlib-output-heron-centroid-smote").innerHTML = ""
+    document.getElementById("evaluation-output-imbalanced").innerHTML = ""
+    document.getElementById("evaluation-output-base-smote").innerHTML = ""
+    document.getElementById("evaluation-output-heron-centroid-smote").innerHTML = ""
+    document.getElementById("information-output-imbalanced").innerHTML = ""
+    document.getElementById("information-output-base-smote").innerHTML = ""
+    document.getElementById("information-output-heron-centroid-smote").innerHTML = ""
     
     # Imbalanced
     await load_data(await is_preset_checked())
@@ -568,5 +581,6 @@ async def run_simulation(event):
     classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote")
 
     # Simulation Finished
-    document.getElementById("run-simulation").innerHTML = "Simulation Finished"
+    document.getElementById("run-simulation").innerHTML = "Run Simulation"
+    document.getElementById("run-simulation").disabled = False
     await hide_toast()

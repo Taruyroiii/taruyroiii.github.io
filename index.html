@@ -41,7 +41,7 @@
                         <input id="input-dataset-file-path" value="./datasets/wdbc.data" readonly style="display: none;"/>
                         <div id="mode-preset" class="parameter">
                             <div class="name">Preset Dataset</div>
-                            <select id="input-dataset-preset"/>
+                            <select id="input-dataset-preset" onchange="updateDefaultParameters(this.value)"/>
                                 <option value="wisconsin">Wisconsin Breast Cancer</option>
                                 <option value="pima">Pima Indians Diabetes</option>
                                 <option value="indian">Indian Liver Patient Records</option>
