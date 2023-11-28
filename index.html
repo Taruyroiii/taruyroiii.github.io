@@ -12,7 +12,7 @@
         <script type="text/javascript" src="main.js"></script>
     </head>
     <body>
-        <script type="py" src="./main.py" config="./pyscript.json" target="output" terminal></script>
+        <script type="py" src="./main.py" config="./pyscript.json" target="output"></script>
         <div id="toast">
             <div id="toast-logo">
                 <div class="lds-ripple"><div></div><div></div></div>
@@ -38,10 +38,10 @@
                             <div class="name">Custom Dataset File</div>
                             <input id="input-dataset-file" type="file"/>
                         </div>
+                        <input id="input-dataset-file-path" value="./datasets/wdbc.data" readonly style="display: none;"/>
                         <div id="mode-preset" class="parameter">
                             <div class="name">Preset Dataset</div>
                             <select id="input-dataset-preset"/>
-                                <option value="bupa">BUPA Liver Disease</option>
                                 <option value="wisconsin">Wisconsin Breast Cancer</option>
                                 <option value="pima">Pima Indians Diabetes</option>
                                 <option value="indian">Indian Liver Patient Records</option>
@@ -52,13 +52,13 @@
                     </div>
                     <div class="parameter">
                         <div class="name">Dataset Name</div>
-                        <input id="input-dataset-name" type="text" placeholder="Dataset Name" value="OXFORD PARKINSON'S DISEASE"/>
+                        <input id="input-dataset-name" type="text" placeholder="Dataset Name" value="Wisconsin Breast Cancer"/>
                     </div>
                 </div>
                 <div class="parameter-group">
                     <div class="parameter">
                         <div class="name">Dimensions</div>
-                        <input id="input-dimensions" type="number" placeholder="Dimensions" min="2" value="22"/>
+                        <input id="input-dimensions" type="number" placeholder="Dimensions" min="2" value="30"/>
                     </div>
                     <div class="parameter">
                         <div class="name">Dataset Start Index</div>
@@ -66,7 +66,7 @@
                     </div>
                     <div class="parameter">
                         <div class="name">Dataset End Index</div>
-                        <input id="input-data-end-index" type="number" placeholder="Dataset End Index" value="-1"/>
+                        <input id="input-data-end-index" type="number" placeholder="Dataset End Index" value="-2"/>
                     </div>
                     <div class="parameter">
                         <div class="name">Correct Label Index</div>
@@ -79,19 +79,19 @@
                 <div class="parameter-group">
                     <div class="parameter">
                         <div class="name">Plot Feature X Axis</div>
-                        <input id="input-plot-f1-index" type="number" placeholder="Plot Feature X Axis" value="18"/>
+                        <input id="input-plot-f1-index" type="number" placeholder="Plot Feature X Axis" value="3"/>
                     </div>
                     <div class="parameter">
                         <div class="name">Feature X Name</div>
-                        <input id="input-plot-f1-name" type="text" placeholder="Feature X Name" value="spread1"/>
+                        <input id="input-plot-f1-name" type="text" placeholder="Feature X Name" value="area1"/>
                     </div>
                     <div class="parameter">
                         <div class="name">Plot Feature Y Axis</div>
-                        <input id="input-plot-f2-index" type="number" placeholder="Plot Feature Y Axis" value="19"/>
+                        <input id="input-plot-f2-index" type="number" placeholder="Plot Feature Y Axis" value="5"/>
                     </div>
                     <div class="parameter">
                         <div class="name">Feature Y Name</div>
-                        <input id="input-plot-f2-name" type="text" placeholder="Feature Y Name" value="spread2"/>
+                        <input id="input-plot-f2-name" type="text" placeholder="Feature Y Name" value="compactness1"/>
                     </div>
                 </div>
                 <div class="heading">

@@ -5,7 +5,6 @@ from io import BytesIO, TextIOWrapper
 from pyscript import when, display
 
 import numpy as np
-import pandas as pd
 import csv
 import time
 import math
@@ -58,7 +57,7 @@ async def read_parameters():
     global filePath, datasetName, plotF1Index, plotF1Name, plotF2Index, plotF2Name, correct_label_index, labelDict, test_train_ratio, centers, is_label_binary, dimensions, data_input_start, data_input_end, test_runs, grouped_data, file
 
     # !!!!!!!! Data File Path !!!!!!!! #
-    filePath = './datasets/parkinsons.data'
+    filePath = document.querySelector("#input-dataset-file-path").value
     datasetName = document.querySelector("#input-dataset-name").value
     plotF1Index = int(document.querySelector("#input-plot-f1-index").value)
     plotF1Name = document.querySelector("#input-plot-f1-name").value
@@ -191,7 +190,7 @@ async def hercenSMOTE(dataset, doPrint = True):
             distances = []
             # DETERMINE TWO-NEAREST NEIGHBORS OF ALL MINORITY INSTANCES
             for neighbor in range(len(minority)):
-                distance = np.linalg.norm(instance[data_input_start:data_input_end] - np.array(minority[neighbor][data_input_start:data_input_end]))
+                distance = np.linalg.norm(np.array(instance[data_input_start:data_input_end]) - np.array(minority[neighbor][data_input_start:data_input_end]))
                 if distance == 0: continue
                 distances.append((minority[neighbor], distance))
             distances.sort(key=operator.itemgetter(1))
@@ -277,7 +276,7 @@ async def centroidSMOTE(dataset, k = 5, doPrint = True):
         distances = []
         # DETERMINE TWO-NEAREST NEIGHBORS OF SELECTED MINORITY INSTANCE
         for neighbor in range(len(minority)):
-            distance = np.linalg.norm(randomInstance[data_input_start:data_input_end] - np.array(minority[neighbor][data_input_start:data_input_end]))
+            distance = np.linalg.norm(np.array(randomInstance[data_input_start:data_input_end]) - np.array(minority[neighbor][data_input_start:data_input_end]))
             if distance == 0: continue
             distances.append((minority[neighbor], distance))
         distances.sort(key=operator.itemgetter(1))
@@ -349,7 +348,7 @@ async def SMOTE(dataset, k = 5, doPrint = True):
         distances = []
         # DETERMINE K-NEAREST NEIGHBORS OF SELECTED MINORITY INSTANCE
         for neighbor in range(len(minority)):
-            distance = np.linalg.norm(randomInstance[data_input_start:data_input_end] - np.array(minority[neighbor][data_input_start:data_input_end]))
+            distance = np.linalg.norm(np.array(randomInstance[data_input_start:data_input_end]) - np.array(minority[neighbor][data_input_start:data_input_end]))
             if distance == 0: continue
             distances.append((minority[neighbor], distance))
         distances.sort(key=operator.itemgetter(1))
@@ -411,7 +410,7 @@ def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarge
         distances = []
     
         for i in range(len(train_data) - 1):
-            distance = np.linalg.norm(data_input - np.array(train_data[i][data_input_start:data_input_end]))
+            distance = np.linalg.norm(np.array(data_input) - np.array(train_data[i][data_input_start:data_input_end]))
             distances.append((train_data[i], distance))
         distances.sort(key=operator.itemgetter(1))
         neighbors = []

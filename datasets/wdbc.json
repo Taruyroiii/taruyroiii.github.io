@@ -1,0 +1,15 @@
+{
+	"name": "Wisconsin Breast Cancer",
+	"file_path": "./datasets/wdbc.data",
+	"dimensions": 30,
+	"data_input_start": 0,
+	"data_input_end": -2,
+	"correct_label_index": -1,
+	"plot_f1_index": 3,
+	"plot_f1_Name": "area1",
+	"plot_f2_Index": 5,
+	"plot_f2_Name": "compactness1",
+	"labels": 2,
+	"test_train_ratio": 0.2,
+	"classification_runs": 1000
+}
