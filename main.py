@@ -1,9 +1,11 @@
 ##################### IMPORTS #####################
 import asyncio
 from js import document
-from pyscript import display
+from io import BytesIO, TextIOWrapper
+from pyscript import when, display
 
 import numpy as np
+import pandas as pd
 import csv
 import time
 import math
@@ -50,43 +52,69 @@ parkinsons_disease = {
     1: "PARKINSON'S"
 }
 
-# !!!!!!!! Data File Path !!!!!!!! #
-filePath = './datasets/parkinsons.data'
-datasetName = document.querySelector("#input-dataset-name").value
-plotF1Index = int(document.querySelector("#input-plot-f1-index").value)
-plotF1Name = document.querySelector("#input-plot-f1-name").value
-plotF2Index = int(document.querySelector("#input-plot-f2-index").value)
-plotF2Name = document.querySelector("#input-plot-f2-name").value
+##################### GLOBAL #####################
 
-# !!!!!!!! Index of Correct Label !!!!!!!! #
-correct_label_index = int(document.querySelector("#input-correct-label-index").value)
+async def read_parameters():
+    global filePath, datasetName, plotF1Index, plotF1Name, plotF2Index, plotF2Name, correct_label_index, labelDict, test_train_ratio, centers, is_label_binary, dimensions, data_input_start, data_input_end, test_runs, grouped_data, file
 
-# !!!!!!!! Label Dictionary !!!!!!!! #
-labelDict = parkinsons_disease
+    # !!!!!!!! Data File Path !!!!!!!! #
+    filePath = './datasets/parkinsons.data'
+    datasetName = document.querySelector("#input-dataset-name").value
+    plotF1Index = int(document.querySelector("#input-plot-f1-index").value)
+    plotF1Name = document.querySelector("#input-plot-f1-name").value
+    plotF2Index = int(document.querySelector("#input-plot-f2-index").value)
+    plotF2Name = document.querySelector("#input-plot-f2-name").value
 
-# !!!!!!!! Test/Train Ratio !!!!!!!! #
-test_train_ratio = float(document.querySelector("#input-test-train-ratio").value)
+    # !!!!!!!! Index of Correct Label !!!!!!!! #
+    correct_label_index = int(document.querySelector("#input-correct-label-index").value)
 
-# AMOUNT OF CLASSIFICATIONS OR LABELS
-centers = int(document.querySelector("#input-centers").value)
-is_label_binary = (centers == 2)
+    # !!!!!!!! Label Dictionary !!!!!!!! #
+    labelDict = parkinsons_disease
 
-# AMOUNT OF FEATURES OR DIMENSIONS
-dimensions = int(document.querySelector("#input-dimensions").value)
-data_input_start = int(document.querySelector("#input-data-start-index").value)
-data_input_end = int(document.querySelector("#input-data-end-index").value)
+    # !!!!!!!! Test/Train Ratio !!!!!!!! #
+    test_train_ratio = float(document.querySelector("#input-test-train-ratio").value)
 
-# AMOUNT OF TEST RUN OF SIMULATIONS TO DO
-test_runs = int(document.querySelector("#input-test-runs").value)
+    # AMOUNT OF CLASSIFICATIONS OR LABELS
+    centers = int(document.querySelector("#input-centers").value)
+    is_label_binary = (centers == 2)
+
+    # AMOUNT OF FEATURES OR DIMENSIONS
+    dimensions = int(document.querySelector("#input-dimensions").value)
+    data_input_start = int(document.querySelector("#input-data-start-index").value)
+    data_input_end = int(document.querySelector("#input-data-end-index").value)
+
+    # AMOUNT OF TEST RUN OF SIMULATIONS TO DO
+    test_runs = int(document.querySelector("#input-test-runs").value)
+
+    # FILE
+    file = open(filePath, newline = '')
+
+##################### CUSTOM DATA READ #####################
+
+@when('change', '#preset-dataset-input')
+async def is_preset_checked(*args):
+    preset_mode_checkbox = document.querySelector("#preset-dataset-input")
+    return (preset_mode_checkbox.checked)
+
+async def processFile(file_input):
+    csv_file = await file_input.arrayBuffer()
+    file_bytes = csv_file.to_bytes()
+    csv_file = BytesIO(file_bytes)
+    return TextIOWrapper(csv_file, encoding='utf-8')
 
 ##################### RAW DATA READ #####################
 
-grouped_data = [ []*centers for i in range(centers)]
-
-def load_data():
-    file = open(filePath, newline = '')
-    raw_data = csv.reader(file, delimiter = ',')
+async def load_data(preset_mode = True):
+    global file
     global grouped_data
+
+    if preset_mode:
+        file = open(filePath, newline = '')
+    else:
+        file_input = document.getElementById('input-dataset-file').files.item(0)
+        file = await processFile(file_input)
+
+    raw_data = csv.reader(file, delimiter = ',')
     grouped_data = [ []*centers for i in range(centers)]
 
     # SEPARATE CLASSES, RESOLVE NON-INTEGER BINARY CLASSIFICATION
@@ -112,6 +140,7 @@ def load_data():
 ##################### MATPLOTLIB #####################
 
 async def plot_dataset(titleAppend = '', *args, **kwargs):
+    global datasetName
     fig, ax = plt.subplots()
 
     featureM1 = [row[plotF1Index] for row in grouped_data[0]]
@@ -129,7 +158,6 @@ async def plot_dataset(titleAppend = '', *args, **kwargs):
 
     fig
     return fig 
-
 
 ##################### HERON-CENTROID SMOTE #####################
 
@@ -510,13 +538,16 @@ def classify_svm(doPrint = True, evalOutputTarget = "output", infoOutputTarget =
 ##################### RUN #####################
 
 async def run_simulation(event):
+    # Read Parameters
+    await read_parameters()
+
     # Remove Skeleton DOMs
     document.getElementById("matplotlib-output-imbalanced").innerHTML = ""
     document.getElementById("matplotlib-output-base-smote").innerHTML = ""
     document.getElementById("matplotlib-output-heron-centroid-smote").innerHTML = ""
     
     # Imbalanced
-    load_data()
+    await load_data(await is_preset_checked())
     fig = await plot_dataset(titleAppend = " (Imbalanced)")
     await edit_toast_text("Plotting imbalanced data...")
     display(fig, target = 'matplotlib-output-imbalanced')
@@ -524,14 +555,14 @@ async def run_simulation(event):
     classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-imbalanced", infoOutputTarget = "information-output-imbalanced")
 
     # Base SMOTE
-    load_data()
+    await load_data(await is_preset_checked())
     await edit_toast_text("Plotting Base SMOTE data...")
     await SMOTE(grouped_data, doPrint = False)
     await edit_toast_text("Classifying Base SMOTE data...")
     classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-base-smote", infoOutputTarget = "information-output-base-smote")
 
     # Heron-centroid SMOTE
-    load_data()
+    await load_data(await is_preset_checked())
     await edit_toast_text("Plotting Heron-Centroid SMOTE data...")
     await hercenSMOTE(grouped_data, doPrint = False)
     await edit_toast_text("Classifying Heron-Centroid SMOTE data...")
