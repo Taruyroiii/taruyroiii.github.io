@@ -1,11 +1,10 @@
 {
     "packages": [
-        "sqlite3",
         "matplotlib",
         "scikit-learn"
     ],
     "files": {
-        "{DOMAIN}": "https://taruyroiii.github.io/",
+        "{DOMAIN}": "http://localhost:5500/",
         "{PATH}": "",
         "{VERSION}": "",
         "{FROM}": "{DOMAIN}/{PATH}/{VERSION}",

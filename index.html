@@ -11,8 +11,9 @@
     </head>
     <body>
         <script type="py" src="./main.py" config="./pyscript.json" target="output"></script>
+        <div id="loading"></div>
         <h1>Parameters</h1>
-        <div class="wrapper">
+        <div class="wrapper settings">
             <div class="parameters">
                 <div class="name">Dataset Characteristics</div>
                 <div class="parameter-group">
@@ -81,18 +82,30 @@
             </div>
         </div>
         <h1>Output</h1>
-        <div class="wrapper">
+        <div class="wrapper output">
+            <h2>Imbalanced dataset</h2>
             <div class="output-wrapper">
-                <div id="matplotlib-output-imbalanced"></div>
-                <div id="evaluation-output-imbalanced"></div>
+                <div id="matplotlib-output-imbalanced">
+                    <div class="skeleton container"></div>
+                </div>
+                <div id="evaluation-output-imbalanced" class="table-output"></div>
+                <div id="information-output-imbalanced" class="table-output"></div>
             </div>
+            <h2>Balanced dataset using base SMOTE</h2>
             <div class="output-wrapper">
-                <div id="matplotlib-output-base-smote"></div>
-                <div id="evaluation-output-base-smote"></div>
+                <div id="matplotlib-output-base-smote">
+                    <div class="skeleton container"></div>
+                </div>
+                <div id="evaluation-output-base-smote" class="table-output"></div>
+                <div id="information-output-base-smote" class="table-output"></div>
             </div>
+            <h2>Balanced dataset using Heron-Centroid SMOTE</h2>
             <div class="output-wrapper">
-                <div id="matplotlib-output-heron-centroid-smote"></div>
-                <div id="evaluation-output-heron-centroid-smote"></div>
+                <div id="matplotlib-output-heron-centroid-smote">
+                    <div class="skeleton container"></div>
+                </div>
+                <div id="evaluation-output-heron-centroid-smote" class="table-output"></div>
+                <div id="information-output-heron-centroid-smote" class="table-output"></div>
             </div>
         </div>
         <div id="output"></div>

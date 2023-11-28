@@ -1,6 +1,7 @@
 ##################### IMPORTS #####################
-from sqlite3 import converters
-from pyscript import document, display
+import asyncio
+from js import document
+from pyscript import display
 
 import numpy as np
 import csv
@@ -352,7 +353,7 @@ async def SMOTE(dataset, k = 5, doPrint = True):
     
 ##################### K-NEAREST NEIGHBORS #####################
 
-def classify_knn(k, doPrint = True, outputTarget = "output"):
+def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarget = "output"):
     true_pos = 0
     true_neg = 0
     false_pos = 0
@@ -418,21 +419,21 @@ def classify_knn(k, doPrint = True, outputTarget = "output"):
     f1_score = (2 * (precision * sensitivity) / (precision + sensitivity))
     g_mean = (math.sqrt(sensitivity * specificity))
 
-    display("Classification: K-nearest Neighbors", target = outputTarget)
-    display("K-value:\t", k, target = outputTarget)
-    display("Accuracy:\t", "%.4f%%" % (accuracy * 100), target = outputTarget)
-    display("Sensitivity:\t", "%.4f%%" % (sensitivity * 100), target = outputTarget)
-    display("Specificity:\t", "%.4f%%" % (specificity * 100), target = outputTarget)
-    display("Precision:\t", "%.4f%%" % (precision * 100), target = outputTarget)
-    display("F1-Score:\t", "%.4f" % f1_score, target = outputTarget)
-    display("G-mean:\t\t", "%.4f" % g_mean, target = outputTarget)
-    display("Total Tests:\t", test_runs, target = outputTarget)
-    display("Average execution time:\t", "%.4f seconds per test run\t\t" % (elapsed_time / test_runs), target = outputTarget)
-    display("Total execution time:\t", "%.4f seconds\t\t" % elapsed_time, target = outputTarget)
+    display("Classification", "K-nearest Neighbors", target = infoOutputTarget)
+    display("K-value", k, target = infoOutputTarget)
+    display("Accuracy", "%.4f%%" % (accuracy * 100), target = evalOutputTarget)
+    display("Sensitivity", "%.4f%%" % (sensitivity * 100), target = evalOutputTarget)
+    display("Specificity", "%.4f%%" % (specificity * 100), target = evalOutputTarget)
+    display("Precision", "%.4f%%" % (precision * 100), target = evalOutputTarget)
+    display("F1-Score", "%.4f" % f1_score, target = evalOutputTarget)
+    display("G-mean", "%.4f" % g_mean, target = evalOutputTarget)
+    display("Total Tests", test_runs, target = infoOutputTarget)
+    display("Average execution time", "%.4f seconds per test run\t\t" % (elapsed_time / test_runs), target = infoOutputTarget)
+    display("Total execution time", "%.4f seconds\t\t" % elapsed_time, target = infoOutputTarget)
 
 ##################### SVM #####################
 
-def classify_svm(doPrint = True, outputTarget = "output"):
+def classify_svm(doPrint = True, evalOutputTarget = "output", infoOutputTarget = "output"):
     true_pos = 0
     true_neg = 0
     false_pos = 0
@@ -482,32 +483,42 @@ def classify_svm(doPrint = True, outputTarget = "output"):
     f1_score = (2 * (precision * sensitivity) / (precision + sensitivity))
     g_mean = (math.sqrt(sensitivity * specificity))
 
-    display("Classification: Support Vector Machine", target = outputTarget)
-    display("Accuracy:\t", "%.4f%%" % (accuracy * 100), target = outputTarget)
-    display("Sensitivity:\t", "%.4f%%" % (sensitivity * 100), target = outputTarget)
-    display("Specificity:\t", "%.4f%%" % (specificity * 100), target = outputTarget)
-    display("Precision:\t", "%.4f%%" % (precision * 100), target = outputTarget)
-    display("F1-Score:\t", "%.4f" % f1_score, target = outputTarget)
-    display("G-mean:\t\t", "%.4f" % g_mean, target = outputTarget)
-    display("Total Tests:\t", test_runs, target = outputTarget)
-    display("Average execution time:\t", "%.4f seconds per test run\t\t" % (elapsed_time / test_runs), target = outputTarget)
-    display("Total execution time:\t", "%.4f seconds\t\t" % elapsed_time, target = outputTarget)
+    display("Classification", "Support Vector Machine", target = infoOutputTarget)
+    display("Accuracy", "%.4f%%" % (accuracy * 100), target = evalOutputTarget)
+    display("Sensitivity", "%.4f%%" % (sensitivity * 100), target = evalOutputTarget)
+    display("Specificity", "%.4f%%" % (specificity * 100), target = evalOutputTarget)
+    display("Precision", "%.4f%%" % (precision * 100), target = evalOutputTarget)
+    display("F1-Score", "%.4f" % f1_score, target = evalOutputTarget)
+    display("G-mean", "%.4f" % g_mean, target = evalOutputTarget)
+    display("Total Tests", test_runs, target = infoOutputTarget)
+    display("Average execution time", "%.4f seconds per test run\t\t" % (elapsed_time / test_runs), target = infoOutputTarget)
+    display("Total execution time", "%.4f seconds\t\t" % elapsed_time, target = infoOutputTarget)
 
 ##################### RUN #####################
 
 async def run_simulation(event):
+    # Remove Skeleton DOMs
+    
+    document.getElementById("matplotlib-output-imbalanced").innerHTML = ""
+    document.getElementById("matplotlib-output-base-smote").innerHTML = ""
+    document.getElementById("matplotlib-output-heron-centroid-smote").innerHTML = ""
+    
     # Imbalanced
     load_data()
     fig = await plot_dataset(titleAppend = " (Imbalanced)")
     display(fig, target = 'matplotlib-output-imbalanced')
-    classify_knn(k = 3, doPrint = False, outputTarget = "evaluation-output-imbalanced") # Classification and evaluation
+    classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-imbalanced", infoOutputTarget = "information-output-imbalanced")
 
     # Base SMOTE
     load_data()
     await SMOTE(grouped_data, doPrint = False)
-    classify_knn(k = 3, doPrint = False, outputTarget = "evaluation-output-base-smote") # Classification and evaluation
+    classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-base-smote", infoOutputTarget = "information-output-base-smote")
 
     # Heron-centroid SMOTE
     load_data()
     await hercenSMOTE(grouped_data, doPrint = False)
-    classify_knn(k = 3, doPrint = False, outputTarget = "evaluation-output-heron-centroid-smote") # Classification and evaluation
+    classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote")
+
+    # Rename Button
+    document.getElementById("run-simulation").innerHTML = "Simulation Finished"
+           
