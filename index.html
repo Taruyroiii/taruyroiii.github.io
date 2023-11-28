@@ -4,23 +4,58 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>SMOTE Modification</title>
+        <script src="./mini-coi.js"></script>
         <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
         <link rel="stylesheet" href="main.css"/>
         <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css"/>
-        <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+        <script defer type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+        <script type="text/javascript" src="main.js"></script>
     </head>
     <body>
         <script type="py" src="./main.py" config="./pyscript.json" target="output"></script>
-        <div id="loading"></div>
+        <div id="toast">
+            <div id="toast-logo">
+                <div class="lds-ripple"><div></div><div></div></div>
+            </div>
+            <div id="toast-text">Loading...</div>
+        </div>
         <h1>Parameters</h1>
         <div class="wrapper settings">
             <div class="parameters">
-                <div class="name">Dataset Characteristics</div>
+                <div class="heading">
+                    <div class="name">Dataset Characteristics</div>
+                    <div>
+                        <label class="switch">
+                            <input id="custom-dataset-input" type="checkbox" onclick="updateDatasetInputData(this.checked);" checked>
+                            <span class="slider round"></span>
+                        </label>
+                        <span>Preset datasets</span>
+                    </div>
+                </div>
                 <div class="parameter-group">
+                    <div class="parameter-group">
+                        <div id="mode-custom" class="parameter" style="display: none;">
+                            <div class="name">Custom Dataset File</div>
+                            <input id="input-dataset-file" type="file"/>
+                        </div>
+                        <div id="mode-preset" class="parameter">
+                            <div class="name">Preset Dataset</div>
+                            <select id="input-dataset-preset"/>
+                                <option value="bupa">BUPA Liver Disease</option>
+                                <option value="wisconsin">Wisconsin Breast Cancer</option>
+                                <option value="pima">Pima Indians Diabetes</option>
+                                <option value="indian">Indian Liver Patient Records</option>
+                                <option value="oxford">Oxford Parkinson's Disease</option>
+                                <option value="cervical">Cervical Cancer Risk Classification</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="parameter">
                         <div class="name">Dataset Name</div>
                         <input id="input-dataset-name" type="text" placeholder="Dataset Name" value="OXFORD PARKINSON'S DISEASE"/>
                     </div>
+                </div>
+                <div class="parameter-group">
                     <div class="parameter">
                         <div class="name">Dimensions</div>
                         <input id="input-dimensions" type="number" placeholder="Dimensions" min="2" value="22"/>
@@ -38,7 +73,9 @@
                         <input id="input-correct-label-index" type="number" placeholder="Correct Label Index" value="-1"/>
                     </div>
                 </div>
-                <div class="name">Scatter Plot Properties</div>
+                <div class="heading">
+                    <div class="name">Scatter Plot Properties</div>
+                </div>
                 <div class="parameter-group">
                     <div class="parameter">
                         <div class="name">Plot Feature X Axis</div>
@@ -57,7 +94,9 @@
                         <input id="input-plot-f2-name" type="text" placeholder="Feature Y Name" value="spread2"/>
                     </div>
                 </div>
-                <div class="name">Simulation Settings</div>
+                <div class="heading">
+                    <div class="name">Simulation Settings</div>
+                </div>
                 <div class="parameter-group">
                     <div class="parameter">
                         <div class="name">Labels/Centers</div>
@@ -72,12 +111,10 @@
                         <input id="input-test-runs" type="number" placeholder="Classification Runs" min="1" value="1000"/>
                     </div>
                 </div>
-                <!--
-                    <input type="file" id="input-data"/>
-                -->
                 <button py-click="run_simulation" id="run-simulation" onclick="
                     this.disabled = true;
                     this.innerHTML = 'Running...';
+                    document.getElementById('toast').classList.remove('hidden');
                 ">Run Simulation</button>
             </div>
         </div>

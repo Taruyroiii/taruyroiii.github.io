@@ -17,6 +17,19 @@ test_counts = []
 train_data = []
 test_data = []
 
+##################### DOM EDIT #####################
+toast = document.querySelector("#toast")
+toast_text = document.querySelector("#toast-text")
+toast.classList.add("hidden")
+
+async def hide_toast():
+    global toast
+    toast.classList.add("hidden")
+
+async def edit_toast_text(text = ""):
+    global toast_text
+    toast_text.innerText = text
+
 ##################### SETTINGS #####################
 
 # Label Dictionaries
@@ -498,7 +511,6 @@ def classify_svm(doPrint = True, evalOutputTarget = "output", infoOutputTarget =
 
 async def run_simulation(event):
     # Remove Skeleton DOMs
-    
     document.getElementById("matplotlib-output-imbalanced").innerHTML = ""
     document.getElementById("matplotlib-output-base-smote").innerHTML = ""
     document.getElementById("matplotlib-output-heron-centroid-smote").innerHTML = ""
@@ -506,19 +518,25 @@ async def run_simulation(event):
     # Imbalanced
     load_data()
     fig = await plot_dataset(titleAppend = " (Imbalanced)")
+    await edit_toast_text("Plotting imbalanced data...")
     display(fig, target = 'matplotlib-output-imbalanced')
+    await edit_toast_text("Classifying imbalanced data...")
     classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-imbalanced", infoOutputTarget = "information-output-imbalanced")
 
     # Base SMOTE
     load_data()
+    await edit_toast_text("Plotting Base SMOTE data...")
     await SMOTE(grouped_data, doPrint = False)
+    await edit_toast_text("Classifying Base SMOTE data...")
     classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-base-smote", infoOutputTarget = "information-output-base-smote")
 
     # Heron-centroid SMOTE
     load_data()
+    await edit_toast_text("Plotting Heron-Centroid SMOTE data...")
     await hercenSMOTE(grouped_data, doPrint = False)
+    await edit_toast_text("Classifying Heron-Centroid SMOTE data...")
     classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote")
 
-    # Rename Button
+    # Simulation Finished
     document.getElementById("run-simulation").innerHTML = "Simulation Finished"
-           
+    await hide_toast()

@@ -47,6 +47,44 @@ h2 {
     font-weight: bold;
 }
 
+#toast {
+    position: fixed;
+    bottom: 4%;
+    left: 2%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    gap: 10px;
+    height: 50px;
+    min-width: 300px;
+    background-color: var(--background-color-2);
+    color: var(--text-color-2);
+    padding: 0.5rem 1rem;
+    border-style: solid;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: var(--background-color);
+    background-color: var(--background-color-2);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    overflow: hidden;
+    z-index: 99;
+    transition: cubic-bezier(1, 0, 0, 1) 0.5s;
+}
+
+#toast.hidden {
+    transform: translateY(300px);
+    opacity: 0;
+}
+
+#toast-logo {
+    width: 60px;
+}
+
+#toast-text {
+    width: 100%;
+}
+
 .wrapper {
     --padding: 2rem;
     width: calc(100% - var(--padding) * 2);
@@ -78,13 +116,21 @@ h2 {
     gap: 10px;
 }
 
-.parameters > .name {
+.heading {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.heading > .name {
     font-weight: bold;
     font-size: 1.2em;
     width: 30ch;
 }
 
-.parameters > .parameter-group {
+.parameter-group {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(300px, 40%), 1fr));
     width: 100%;
@@ -97,7 +143,8 @@ h2 {
     font-style: italic;
 }
 
-.parameter > input {
+.parameter > input,
+.parameter > select {
     width: calc(100% - 2em);
     padding: 0.5em 1em;
     border-radius: 4px;
@@ -105,6 +152,32 @@ h2 {
     font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
     font-size: 1.1em;
+    background-color: var(--text-color);
+    color: var(--background-color);
+}
+
+.parameter > select {
+    width: 100%;
+}
+
+.parameter > input[type = "file"]::file-selector-button {
+    padding: auto 1em;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1em;
+    font-family: 'Courier New', Courier, monospace;
+    margin-right: 0.5rem;
+    border-radius: 4px;
+    background-color: var(--accent-color-success);
+    color: var(--background-color-2);
+    outline: none;
+    border-width: 0;
+    transition: all 0.2s;
+}
+
+.parameter > input[type = "file"]::file-selector-button:hover {
+    filter: brightness(0.8);
+    transform: translateY(2px);
 }
 
 .output-wrapper {
@@ -156,6 +229,120 @@ h2 {
     font-weight: bold;
     background-color: #2e302e;
 }
+
+/* FROM W3SCHOOLS */
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 2px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--accent-color-success);
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px var(--accent-color-success);
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(18px);
+    -ms-transform: translateX(18px);
+    transform: translateX(18px);
+}
+
+/* Rounded sliders */
+    .slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* END OF W3SCHOOLS SLIDERS */
+
+/* LOADING.IO CSS LOADERS */
+.lds-ripple {
+    display: inline-block;
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+.lds-ripple div {
+    position: absolute;
+    border: 3px solid #fff;
+    opacity: 1;
+    border-radius: 50%;
+    animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+.lds-ripple div:nth-child(2) {
+    animation-delay: -0.5s;
+}
+@keyframes lds-ripple {
+    0% {
+        top: 18px;
+        left: 18px;
+        width: 0;
+        height: 0;
+        opacity: 0;
+    }
+    4.9% {
+        top: 18px;
+        left: 18px;
+        width: 0;
+        height: 0;
+        opacity: 0;
+    }
+    5% {
+        top: 18px;
+        left: 18px;
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    100% {
+        top: 0px;
+        left: 0px;
+        width: 36px;
+        height: 36px;
+        opacity: 0;
+    }
+}
+
+/* END OF LOADING.IO LOADERS */
 
 @keyframes skeleton-loading {
   0% {
