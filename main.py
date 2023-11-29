@@ -70,7 +70,7 @@ async def read_parameters():
     # !!!!!!!! Label Dictionary !!!!!!!! #
     labelDict = parkinsons_disease
 
-    # !!!!!!!! Test/Train Ratio !!!!!!!! #
+    # !!!!!!!! Test/Train Data !!!!!!!! #
     test_train_ratio = float(document.querySelector("#input-test-train-ratio").value)
 
     # AMOUNT OF CLASSIFICATIONS OR LABELS
@@ -95,6 +95,10 @@ async def read_parameters():
 async def is_preset_checked(*args):
     preset_mode_checkbox = document.querySelector("#preset-dataset-input")
     return (preset_mode_checkbox.checked)
+
+async def is_test_data_checked(*args):
+    test_data_checkbox = document.querySelector("#test-dataset-input")
+    return (test_data_checkbox.checked)
 
 async def processFile(file_input):
     csv_file = await file_input.arrayBuffer()
@@ -406,12 +410,17 @@ def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarge
     false_pos = 0
     false_neg = 0
 
+    if is_test_data_checked:
+        input_data = test_data
+    else:
+        input_data = train_data
+
     start = time.time()
 
     for test in (range(test_runs)):
-        test_data_index = math.floor(np.random.random(size = None) * len(test_data))
-        data_input = test_data[test_data_index][data_input_start:data_input_end]
-        correct_label = test_data[test_data_index][correct_label_index]
+        input_data_index = math.floor(np.random.random(size = None) * len(input_data))
+        data_input = input_data[input_data_index][data_input_start:data_input_end]
+        correct_label = input_data[input_data_index][correct_label_index]
         best_classification = []
 
         distances = []
@@ -486,12 +495,17 @@ def classify_svm(doPrint = True, evalOutputTarget = "output", infoOutputTarget =
     false_pos = 0
     false_neg = 0
 
+    if is_test_data_checked:
+        input_data = test_data
+    else:
+        input_data = train_data
+
     start = time.time()
 
     for test in (range(test_runs)):
-        test_data_index = math.floor(np.random.random(size = None) * len(test_data))
-        data_input = test_data[test_data_index][data_input_start:data_input_end]
-        correct_label = test_data[test_data_index][correct_label_index]
+        input_data_index = math.floor(np.random.random(size = None) * len(input_data))
+        data_input = input_data[input_data_index][data_input_start:data_input_end]
+        correct_label = input_data[input_data_index][correct_label_index]
         
         classify = svm.SVC()
         classify.fit(np.array(train_data)[:, data_input_start:data_input_end], np.array(train_data)[:, correct_label_index])

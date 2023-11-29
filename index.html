@@ -24,12 +24,12 @@
             <div class="parameters">
                 <div class="heading">
                     <div class="name">Dataset Characteristics</div>
-                    <div>
+                    <div class="heading-switch">
+                        <span>Preset datasets</span>
                         <label class="switch">
                             <input id="preset-dataset-input" type="checkbox" onclick="updateDatasetInputData(this.checked);" checked>
                             <span class="slider round"></span>
                         </label>
-                        <span>Preset datasets</span>
                     </div>
                 </div>
                 <div class="parameter-group">
@@ -96,6 +96,13 @@
                 </div>
                 <div class="heading">
                     <div class="name">Simulation Settings</div>
+                    <div class="heading-switch">
+                        <span>Use test data as input</span>
+                        <label class="switch">
+                            <input id="test-dataset-input" type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
                 </div>
                 <div class="parameter-group">
                     <div class="parameter">
