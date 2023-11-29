@@ -11,6 +11,8 @@
         "{TO}": "./datasets/",
         "{FROM}/datasets/wdbc.data": "{TO}",
         "{FROM}/datasets/wdbc.json": "{TO}",
+        "{FROM}/datasets/pima_diabetes.csv": "{TO}",
+        "{FROM}/datasets/pima_diabetes.json": "{TO}",
         "{FROM}/datasets/parkinsons.data": "{TO}",
         "{FROM}/datasets/parkinsons.json": "{TO}"
     }

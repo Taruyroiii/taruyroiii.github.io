@@ -13,13 +13,13 @@ function updateDatasetInputData(presetMode = True) {
 
 function getJSONPath(datasetName) {
     switch (datasetName) {
-        case "wisconsin":
+        case "breast":
             return "./datasets/wdbc.json";
-        case "pima":
+        case "diabetes":
+            return "./datasets/pima_diabetes.json";
+        case "liver":
             return "./datasets/wdbc.json";
-        case "indian":
-            return "./datasets/wdbc.json";
-        case "oxford":
+        case "parkinsons":
             return "./datasets/parkinsons.json";
         case "cervical":
             return "./datasets/wdbc.json";
