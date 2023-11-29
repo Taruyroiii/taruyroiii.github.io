@@ -9,6 +9,9 @@
         "{VERSION}": "",
         "{FROM}": "{DOMAIN}/{PATH}/{VERSION}",
         "{TO}": "./datasets/",
-        "{FROM}/parkinsons.data": "{TO}"
+        "{FROM}/datasets/wdbc.data": "{TO}",
+        "{FROM}/datasets/wdbc.json": "{TO}",
+        "{FROM}/datasets/parkinsons.data": "{TO}",
+        "{FROM}/datasets/parkinsons.json": "{TO}"
     }
 }
