@@ -18,11 +18,13 @@ function getJSONPath(datasetName) {
         case "diabetes":
             return "./datasets/pima_diabetes.json";
         case "liver":
-            return "./datasets/wdbc.json";
+            return "./datasets/indian_liver.json";
         case "parkinsons":
             return "./datasets/parkinsons.json";
         case "cervical":
             return "./datasets/wdbc.json";
+        case "heart":
+            return "./datasets/heart_attack.json";
         default:
             return "";
     }
