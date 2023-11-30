@@ -425,9 +425,9 @@ def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarge
 
         distances = []
     
-        for i in range(len(train_data) - 1):
-            distance = np.linalg.norm(np.array(data_input) - np.array(train_data[i][data_input_start:data_input_end]))
-            distances.append((train_data[i], distance))
+        for i in range(len(input_data) - 1):
+            distance = np.linalg.norm(np.array(data_input) - np.array(input_data[i][data_input_start:data_input_end]))
+            distances.append((input_data[i], distance))
         distances.sort(key=operator.itemgetter(1))
         neighbors = []
         for i in range(k):
@@ -508,7 +508,7 @@ def classify_svm(doPrint = True, evalOutputTarget = "output", infoOutputTarget =
         correct_label = input_data[input_data_index][correct_label_index]
         
         classify = svm.SVC()
-        classify.fit(np.array(train_data)[:, data_input_start:data_input_end], np.array(train_data)[:, correct_label_index])
+        classify.fit(np.array(input_data)[:, data_input_start:data_input_end], np.array(input_data)[:, correct_label_index])
 
         prediction = classify.predict(np.array(data_input).reshape(1, -1))
 
