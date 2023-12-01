@@ -118,6 +118,14 @@
                         <div class="name">Classification Runs</div>
                         <input id="input-test-runs" type="number" placeholder="Classification Runs" min="1" value="1000"/>
                     </div>
+                    <div class="parameter">
+                        <div class="name">Classification Algorithm</div>
+                        <select id="input-classification-algo"/>
+                            <option value="knn">K-nearest Neighbors</option>
+                            <option value="svm">Support Vector Machine</option>
+                            <option value="rf">Random Forest</option>
+                        </select>
+                    </div>
                 </div>
                 <button py-click="run_simulation" id="run-simulation" onclick="
                     this.disabled = true;
@@ -136,13 +144,13 @@
                 <div id="evaluation-output-imbalanced" class="table-output"></div>
                 <div id="information-output-imbalanced" class="table-output"></div>
             </div>
-            <h2>Balanced dataset using base SMOTE</h2>
+            <h2>Balanced dataset using existing SMOTE</h2>
             <div class="output-wrapper">
-                <div id="matplotlib-output-base-smote">
+                <div id="matplotlib-output-existing-smote">
                     <div class="skeleton container"></div>
                 </div>
-                <div id="evaluation-output-base-smote" class="table-output"></div>
-                <div id="information-output-base-smote" class="table-output"></div>
+                <div id="evaluation-output-existing-smote" class="table-output"></div>
+                <div id="information-output-existing-smote" class="table-output"></div>
             </div>
             <h2>Balanced dataset using Heron-Centroid SMOTE</h2>
             <div class="output-wrapper">

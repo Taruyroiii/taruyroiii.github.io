@@ -12,6 +12,7 @@ import random
 import operator
 import matplotlib.pyplot as plt
 from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
 
 train_counts = []
 test_counts = []
@@ -33,28 +34,10 @@ async def edit_toast_text(text = ""):
 
 ##################### SETTINGS #####################
 
-# Label Dictionaries
-generic = {
-    0: "0",
-    1: "1"
-}
-
-breast_cancer = {
-    "M": 0,
-    "B": 1,
-    0: "MALIGNANT",
-    1: "BENIGN"
-}
-
-parkinsons_disease = {
-    0: "HEALTHY",
-    1: "PARKINSON'S"
-}
-
-##################### GLOBAL #####################
+##################### GLOBAL VARIABLES #####################
 
 async def read_parameters():
-    global filePath, datasetName, plotF1Index, plotF1Name, plotF2Index, plotF2Name, correct_label_index, labelDict, test_train_ratio, centers, is_label_binary, dimensions, data_input_start, data_input_end, test_runs, grouped_data, file
+    global filePath, datasetName, plotF1Index, plotF1Name, plotF2Index, plotF2Name, correct_label_index, test_train_ratio, classification_algo, centers, is_label_binary, dimensions, data_input_start, data_input_end, test_runs, grouped_data, file
 
     # !!!!!!!! Data File Path !!!!!!!! #
     filePath = document.querySelector("#input-dataset-file-path").value
@@ -67,11 +50,9 @@ async def read_parameters():
     # !!!!!!!! Index of Correct Label !!!!!!!! #
     correct_label_index = int(document.querySelector("#input-correct-label-index").value)
 
-    # !!!!!!!! Label Dictionary !!!!!!!! #
-    labelDict = parkinsons_disease
-
     # !!!!!!!! Test/Train Data !!!!!!!! #
     test_train_ratio = float(document.querySelector("#input-test-train-ratio").value)
+    classification_algo = document.querySelector("#input-classification-algo").value
 
     # AMOUNT OF CLASSIFICATIONS OR LABELS
     centers = int(document.querySelector("#input-centers").value)
@@ -134,7 +115,7 @@ async def load_data(preset_mode = True):
             try:
                 converted_data.append(float(attr))
             except:
-                converted_data.append(labelDict[attr])
+                converted_data.append(attr)
         grouped_data[int(converted_data[correct_label_index])].append(converted_data)
 
     # DIVIDE DATA TO TEST AND TRAIN
@@ -196,6 +177,7 @@ async def hercenSMOTE(dataset, doPrint = True):
         # DETERMINE IMBALANCE RATIO
         imbalanceRatio = len(majority)/len(minority)
         # DETERMINE TRIANGLE AREAS
+        area = 0
         for instance in calculateMinority[::-1]:
             if len(calculateMinority) <= 0: break
             distances = []
@@ -221,15 +203,32 @@ async def hercenSMOTE(dataset, doPrint = True):
         centroid = [ []*dimensions for i in range(dimensions)]
         for feature in range(len(centroid)):
             centroid[feature] = (areas[-1][1][feature] + areas[-1][2][feature] + areas[-1][3][feature]) / 3
-        # ADD CENTROID AS NEW MINORITY INSTANCE
-        minority.append(centroid)
+        # ADD CLASSIFICATION
+        centroid.insert(correct_label_index, areas[-1][1][correct_label_index]) # CLASSIFICATION
+        # DETERMINE TWO-NEAREST MAJORITY INSTANCE OF CENTROID
+        majorityDistances = []
+        for neighbor in range(len(majority)):
+            distance = np.linalg.norm(np.array(centroid[data_input_start:data_input_end]) - np.array(majority[neighbor][data_input_start:data_input_end]))
+            majorityDistances.append((majority[neighbor], distance))
+        majorityDistances.sort(key=operator.itemgetter(1))
+        majorityNeighbors = []
+        for i in range(2):
+            majorityNeighbors.append(majorityDistances[i][0])
+        # DISTANCE OF THE TWO MAJORITY NEIGHBORS FROM EACH OTHER
+        twoMajorityNeighborsDistance = np.linalg.norm(np.array(majorityNeighbors[0][data_input_start:data_input_end]) - np.array(majorityNeighbors[1][data_input_start:data_input_end]))
+        # MAJORITY SEMIPERIMETER
+        s = (twoMajorityNeighborsDistance + majorityDistances[0][1] + majorityDistances[1][1]) / 2
+        # MAJORITY HERON'S FORMULA
+        majorityArea = np.sqrt(s * (s - twoMajorityNeighborsDistance) * (s - majorityDistances[0][1]) * (s - majorityDistances[1][1]))
+        # ADD CENTROID AS NEW MINORITY INSTANCE IF MAJORITY AREA > MINORITY AREA
+        if majorityArea > area:
+            minority.append(centroid)
+            calculateMinority.append(centroid)
+            calculateMinority.append(areas[-1][1])
+            calculateMinority.append(areas[-1][2])
+            calculateMinority.append(areas[-1][3])
         # ADD VERTICES AND CENTROID TO CALCULATEMINORITY FOR RECALCULATION OF AREA
         #centroid.insert(0, 0) # EXTRA ID COLUMN
-        centroid.insert(correct_label_index, areas[-1][1][correct_label_index]) # CLASSIFICATION
-        calculateMinority.append(centroid)
-        calculateMinority.append(areas[-1][1])
-        calculateMinority.append(areas[-1][2])
-        calculateMinority.append(areas[-1][3])
         # REMOVE LARGEST AREA AS IT IS RESOLVED
         areas.pop()
         # PRINT IMBALANCE RATIO
@@ -257,83 +256,11 @@ async def hercenSMOTE(dataset, doPrint = True):
     # PLOT DATASET
     fig = await plot_dataset(titleAppend = " (Heron-Centroid SMOTE)")
     display(fig, target = 'matplotlib-output-heron-centroid-smote')
-
-##################### CENTROID SMOTE #####################
-
-async def centroidSMOTE(dataset, k = 5, doPrint = True):
-    if doPrint: print("USING CENTROID SMOTE: \n")
-    minority = []
-    majority = []
-    train_counts = []
-    test_counts = []
-    train_data = []
-    test_data = []
-    imbalanceRatio = 2.0
-            
-    # DETERMINE MINORITY
-    if len(dataset[0]) < len(dataset[1]):
-        minority = dataset[0]
-        majority = dataset[1]
-    else:
-        minority = dataset[1]
-        majority = dataset[0]
-
-    # CENTROID SMOTE ALGORITHM
-    while imbalanceRatio > 1.0:
-        # DETERMINE IMBALANCE RATIO
-        imbalanceRatio = len(majority)/len(minority)
-        # DETERMINE RANDOM MINORITY INSTANCE
-        randomInstance = minority[random.randint(0, len(minority) - 1)]
-        distances = []
-        # DETERMINE TWO-NEAREST NEIGHBORS OF SELECTED MINORITY INSTANCE
-        for neighbor in range(len(minority)):
-            distance = np.linalg.norm(np.array(randomInstance[data_input_start:data_input_end]) - np.array(minority[neighbor][data_input_start:data_input_end]))
-            if distance == 0: continue
-            distances.append((minority[neighbor], distance))
-        distances.sort(key=operator.itemgetter(1))
-        neighbors = []
-        for i in range(k):
-            neighbors.append(distances[i][0])
-        chosenNeighbors = np.random.Generator.choice(np.array(neighbors), size = 2, replace = False)
-        if doPrint: print(chosenNeighbors)
-        # DETERMINE COORDINATE FOR NEW INSTANCE BASED ON CHOSEN RANDOM INSTANCE AND ITS TWO-NEAREST NEIGHBORS
-        newInstance = [ []*dimensions for i in range(dimensions)]
-        for feature in range(dimensions):
-            newInstance[feature] = (randomInstance[feature] + neighbors[0][feature] + neighbors[1][feature]) / 3
-        # ADD NEW INSTANCE
-        #newInstance.insert(0, 0) # EXTRA ID COLUMN
-        newInstance.insert(correct_label_index, randomInstance[correct_label_index]) # CLASSIFICATION
-        minority.append(newInstance)
-        # PRINT IMBALANCE RATIO
-        if doPrint: print("\033[1A\033[KIR =", imbalanceRatio)
-
-    # DIVIDE DATA TO TEST AND TRAIN
-    for data_group in grouped_data:
-        train_counts.append(math.floor(len(data_group) * (1 - test_train_ratio)))
-        test_counts.append(math.ceil(len(data_group) * test_train_ratio))
-
-        random.shuffle(data_group)
     
-        train_data.extend(data_group[test_counts[grouped_data.index(data_group)]:])
-        test_data.extend(data_group[:test_counts[grouped_data.index(data_group)]])
+##################### EXISTING SMOTE #####################
 
-    total_train = len(train_data)
-    total_test = len(test_data)
-
-    if doPrint: 
-        print("Train data:", total_train, "(0:", train_counts[0], "| 1:", train_counts[1],")")
-        print("Test data:", total_test, "(0:", test_counts[0], "| 1:", test_counts[1],")")
-        print("Test/Train Ratio:", len(test_data)/len(train_data))
-        print("\n---\n")
-
-    # PLOT DATASET
-    fig = await plot_dataset(titleAppend = " (Centroid SMOTE)")
-    display(fig, target = 'matplotlib-output-centroid-smote')
-
-##################### BASE SMOTE #####################
-
-async def SMOTE(dataset, k = 5, doPrint = True):
-    if doPrint: print("USING SMOTE: \n")
+async def SMOTE(dataset, k = 5, doPrint = True):    
+    if doPrint: print("USING EXISTING SMOTE: \n")
     minority = []
     majority = []
     train_counts = []
@@ -399,9 +326,43 @@ async def SMOTE(dataset, k = 5, doPrint = True):
         print("\n---\n")
 
     # PLOT DATASET
-    fig = await plot_dataset(titleAppend = " (Base SMOTE)")
-    display(fig, target = 'matplotlib-output-base-smote')
+    fig = await plot_dataset(titleAppend = " (Existing SMOTE)")
+    display(fig, target = 'matplotlib-output-existing-smote')
     
+##################### PERFORMANCE METRICS #####################
+def calc_accuracy(true_pos, true_neg, false_pos, false_neg):
+    if (true_pos + true_neg) == 0:
+        return 0
+    else:
+        return ((true_pos + true_neg) / (true_pos + true_neg + false_pos + false_neg))
+    
+def calc_sensitivity(true_pos, false_neg):
+    if (true_pos + false_neg) == 0:
+        return 0
+    else:
+        return (true_pos / (true_pos + false_neg))
+    
+def calc_specificity(true_neg, false_pos):
+    if (false_pos + true_neg) == 0:
+        return 0
+    else:
+        return (true_neg / (false_pos + true_neg))
+
+def calc_precision(true_pos, false_pos):
+    if (true_pos + false_pos) == 0:
+        return 0
+    else:
+        return (true_pos / (true_pos + false_pos))
+
+def calc_f1_score(precision, sensitivity):
+    if (precision + sensitivity) == 0:
+        return 0
+    else:
+        return (2 * (precision * sensitivity) / (precision + sensitivity))
+
+def calc_g_mean(sensitivity, specificity):
+    return (math.sqrt(sensitivity * specificity))
+
 ##################### K-NEAREST NEIGHBORS #####################
 
 def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarget = "output"):
@@ -445,35 +406,28 @@ def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarge
 
         if best_classification == correct_label:
             is_correct = " CORRECT "
-            if (not is_label_binary):
+            if correct_label == 1:
                 true_pos += 1
-                true_neg += 1
             else:
-                if labelDict[correct_label] == "0" or labelDict[correct_label] == "MALIGNANT" or labelDict[correct_label] == "DIABETIC" or labelDict[correct_label] == "PARKINSON'S":
-                    true_pos += 1
-                else: 
-                    true_neg += 1
+                true_neg += 1
         else:
             is_correct = " WRONG "
-            if (not is_label_binary):
-                false_pos += 1
+            if correct_label == 1:
                 false_neg += 1
             else:
-                if labelDict[correct_label] == "0" or labelDict[correct_label] == "MALIGNANT" or labelDict[correct_label] == "DIABETIC" or labelDict[correct_label] == "PARKINSON'S":
-                    false_pos += 1
-                else: 
-                    false_neg += 1
-        is_correct += "\t[" + labelDict[correct_label] + "]"
-        if doPrint: print("\033[1A\033[KRUN #", test + 1, ": \t", labelDict[best_classification], "\t", is_correct)
+                false_pos += 1
+
+        is_correct += "\t[" + str(correct_label) + "]"
+        if doPrint: print("\033[1A\033[KRUN #", test + 1, ": \t", str(best_classification), "\t", is_correct)
    
     elapsed_time = time.time() - start
 
-    accuracy = (true_pos + true_neg) / (true_pos + true_neg + false_pos + false_neg)
-    sensitivity = true_pos / (true_pos + false_neg)
-    specificity = true_neg / (false_pos + true_neg)
-    precision = true_pos / (true_pos + false_pos)
-    f1_score = (2 * (precision * sensitivity) / (precision + sensitivity))
-    g_mean = (math.sqrt(sensitivity * specificity))
+    accuracy = calc_accuracy(true_pos, true_neg, false_pos, false_neg)
+    sensitivity = calc_sensitivity(true_pos, false_neg)
+    specificity = calc_specificity(true_neg, false_pos)
+    precision = calc_precision(true_pos, false_pos)
+    f1_score = calc_f1_score(precision, sensitivity)
+    g_mean = calc_g_mean(sensitivity, specificity)
 
     display("Classification", "K-nearest Neighbors", target = infoOutputTarget)
     display("K-value", k, target = infoOutputTarget)
@@ -501,50 +455,103 @@ def classify_svm(doPrint = True, evalOutputTarget = "output", infoOutputTarget =
         input_data = train_data
 
     start = time.time()
+        
+    svm_classify = svm.SVC()
+    svm_classify.fit(np.array(input_data)[:, data_input_start:data_input_end], np.array(input_data)[:, correct_label_index])
 
     for test in (range(test_runs)):
         input_data_index = math.floor(np.random.random(size = None) * len(input_data))
         data_input = input_data[input_data_index][data_input_start:data_input_end]
         correct_label = input_data[input_data_index][correct_label_index]
-        
-        classify = svm.SVC()
-        classify.fit(np.array(input_data)[:, data_input_start:data_input_end], np.array(input_data)[:, correct_label_index])
 
-        prediction = classify.predict(np.array(data_input).reshape(1, -1))
+        prediction = svm_classify.predict(np.array(data_input).reshape(1, -1))
+        if prediction == correct_label:
+            is_correct = " CORRECT "
+            if correct_label == 1:
+                true_pos += 1
+            else:
+                true_neg += 1
+        else:
+            is_correct = " WRONG "
+            if correct_label == 1:
+                false_neg += 1
+            else:
+                false_pos += 1
+
+        is_correct += "\t[" + str(correct_label) + "]"
+        if doPrint: print("\033[1A\033[KRUN #", test + 1, ": \t", str(prediction), "\t", is_correct)
+        
+    elapsed_time = time.time() - start
+    
+    accuracy = calc_accuracy(true_pos, true_neg, false_pos, false_neg)
+    sensitivity = calc_sensitivity(true_pos, false_neg)
+    specificity = calc_specificity(true_neg, false_pos)
+    precision = calc_precision(true_pos, false_pos)
+    f1_score = calc_f1_score(precision, sensitivity)
+    g_mean = calc_g_mean(sensitivity, specificity)
+
+    display("Classification", "Support Vector Machine", target = infoOutputTarget)
+    display("Accuracy", "%.4f%%" % (accuracy * 100), target = evalOutputTarget)
+    display("Sensitivity", "%.4f%%" % (sensitivity * 100), target = evalOutputTarget)
+    display("Specificity", "%.4f%%" % (specificity * 100), target = evalOutputTarget)
+    display("Precision", "%.4f%%" % (precision * 100), target = evalOutputTarget)
+    display("F1-Score", "%.4f" % f1_score, target = evalOutputTarget)
+    display("G-mean", "%.4f" % g_mean, target = evalOutputTarget)
+    display("Total Tests", test_runs, target = infoOutputTarget)
+    display("Average execution time", "%.4f seconds per test run\t\t" % (elapsed_time / test_runs), target = infoOutputTarget)
+    display("Total execution time", "%.4f seconds\t\t" % elapsed_time, target = infoOutputTarget)
+
+##################### RANDOM FOREST #####################
+
+def classify_rf(doPrint = True, evalOutputTarget = "output", infoOutputTarget = "output"):
+    true_pos = 0
+    true_neg = 0
+    false_pos = 0
+    false_neg = 0
+
+    if is_test_data_checked:
+        input_data = test_data
+    else:
+        input_data = train_data
+
+    start = time.time()
+        
+    rf_classify = RandomForestClassifier(n_estimators=100, max_depth=None, random_state=42)
+    rf_classify.fit(np.array(input_data)[:, data_input_start:data_input_end], np.array(input_data)[:, correct_label_index])
+
+    for test in (range(test_runs)):
+        input_data_index = math.floor(np.random.random(size = None) * len(input_data))
+        data_input = input_data[input_data_index][data_input_start:data_input_end]
+        correct_label = input_data[input_data_index][correct_label_index]
+
+        prediction = rf_classify.predict(np.array(data_input).reshape(1, -1))
 
         if prediction == correct_label:
             is_correct = " CORRECT "
-            if (not is_label_binary):
+            if correct_label == 1:
                 true_pos += 1
-                true_neg += 1
             else:
-                if labelDict[correct_label] == "0" or labelDict[correct_label] == "MALIGNANT" or labelDict[correct_label] == "DIABETIC" or labelDict[correct_label] == "PARKINSON'S":
-                    true_pos += 1
-                else: 
-                    true_neg += 1
+                true_neg += 1
         else:
             is_correct = " WRONG "
-            if (not is_label_binary):
-                false_pos += 1
+            if correct_label == 1:
                 false_neg += 1
             else:
-                if labelDict[correct_label] == "0" or labelDict[correct_label] == "MALIGNANT" or labelDict[correct_label] == "DIABETIC" or labelDict[correct_label] == "PARKINSON'S":
-                    false_pos += 1
-                else: 
-                    false_neg += 1
-        is_correct += "\t[" + labelDict[correct_label] + "]"
-        if doPrint: print("\033[1A\033[KRUN #", test + 1, ": \t", labelDict[prediction], "\t", is_correct)
+                false_pos += 1
+
+        is_correct += "\t[" + str(correct_label) + "]"
+        if doPrint: print("\033[1A\033[KRUN #", test + 1, ": \t", str(prediction), "\t", is_correct)
         
     elapsed_time = time.time() - start
+    
+    accuracy = calc_accuracy(true_pos, true_neg, false_pos, false_neg)
+    sensitivity = calc_sensitivity(true_pos, false_neg)
+    specificity = calc_specificity(true_neg, false_pos)
+    precision = calc_precision(true_pos, false_pos)
+    f1_score = calc_f1_score(precision, sensitivity)
+    g_mean = calc_g_mean(sensitivity, specificity)
 
-    accuracy = (true_pos + true_neg) / (true_pos + true_neg + false_pos + false_neg)
-    sensitivity = true_pos / (true_pos + false_neg)
-    specificity = true_neg / (false_pos + true_neg)
-    precision = true_pos / (true_pos + false_pos)
-    f1_score = (2 * (precision * sensitivity) / (precision + sensitivity))
-    g_mean = (math.sqrt(sensitivity * specificity))
-
-    display("Classification", "Support Vector Machine", target = infoOutputTarget)
+    display("Classification", "Random Forest", target = infoOutputTarget)
     display("Accuracy", "%.4f%%" % (accuracy * 100), target = evalOutputTarget)
     display("Sensitivity", "%.4f%%" % (sensitivity * 100), target = evalOutputTarget)
     display("Specificity", "%.4f%%" % (specificity * 100), target = evalOutputTarget)
@@ -563,13 +570,13 @@ async def run_simulation(event):
 
     # Remove Skeleton DOMs
     document.getElementById("matplotlib-output-imbalanced").innerHTML = ""
-    document.getElementById("matplotlib-output-base-smote").innerHTML = ""
+    document.getElementById("matplotlib-output-existing-smote").innerHTML = ""
     document.getElementById("matplotlib-output-heron-centroid-smote").innerHTML = ""
     document.getElementById("evaluation-output-imbalanced").innerHTML = ""
-    document.getElementById("evaluation-output-base-smote").innerHTML = ""
+    document.getElementById("evaluation-output-existing-smote").innerHTML = ""
     document.getElementById("evaluation-output-heron-centroid-smote").innerHTML = ""
     document.getElementById("information-output-imbalanced").innerHTML = ""
-    document.getElementById("information-output-base-smote").innerHTML = ""
+    document.getElementById("information-output-existing-smote").innerHTML = ""
     document.getElementById("information-output-heron-centroid-smote").innerHTML = ""
     
     # Imbalanced
@@ -578,21 +585,42 @@ async def run_simulation(event):
     await edit_toast_text("Plotting imbalanced data...")
     display(fig, target = 'matplotlib-output-imbalanced')
     await edit_toast_text("Classifying imbalanced data...")
-    classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-imbalanced", infoOutputTarget = "information-output-imbalanced")
+    if (classification_algo == "knn"):
+        classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-imbalanced", infoOutputTarget = "information-output-imbalanced")
+    elif (classification_algo == "svm"):
+        classify_svm(doPrint = False, evalOutputTarget = "evaluation-output-imbalanced", infoOutputTarget = "information-output-imbalanced")
+    elif (classification_algo == "rf"):
+        classify_rf(doPrint = True, evalOutputTarget = "evaluation-output-imbalanced", infoOutputTarget = "information-output-imbalanced")
+    else:
+        raise Exception("Invalid classification algorithm mode.")
 
-    # Base SMOTE
+    # Existing SMOTE
     await load_data(await is_preset_checked())
-    await edit_toast_text("Plotting Base SMOTE data...")
+    await edit_toast_text("Plotting Existing SMOTE data...")
     await SMOTE(grouped_data, doPrint = False)
-    await edit_toast_text("Classifying Base SMOTE data...")
-    classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-base-smote", infoOutputTarget = "information-output-base-smote")
+    await edit_toast_text("Classifying Existing SMOTE data...")
+    if (classification_algo == "knn"):
+        classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-existing-smote", infoOutputTarget = "information-output-existing-smote")
+    elif (classification_algo == "svm"):
+        classify_svm(doPrint = False, evalOutputTarget = "evaluation-output-existing-smote", infoOutputTarget = "information-output-existing-smote")
+    elif (classification_algo == "rf"):
+        classify_rf(doPrint = True, evalOutputTarget = "evaluation-output-existing-smote", infoOutputTarget = "information-output-existing-smote")
+    else:
+        raise Exception("Invalid classification algorithm mode.")
 
     # Heron-centroid SMOTE
     await load_data(await is_preset_checked())
     await edit_toast_text("Plotting Heron-Centroid SMOTE data...")
     await hercenSMOTE(grouped_data, doPrint = False)
     await edit_toast_text("Classifying Heron-Centroid SMOTE data...")
-    classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote")
+    if (classification_algo == "knn"):
+        classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote")
+    elif (classification_algo == "svm"):
+        classify_svm(doPrint = False, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote")
+    elif (classification_algo == "rf"):
+        classify_rf(doPrint = True, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote")
+    else:
+        raise Exception("Invalid classification algorithm mode.")
 
     # Simulation Finished
     document.getElementById("run-simulation").innerHTML = "Run Simulation"
