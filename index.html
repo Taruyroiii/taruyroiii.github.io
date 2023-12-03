@@ -122,16 +122,12 @@
                         <div class="name">Classification Algorithm</div>
                         <select id="input-classification-algo"/>
                             <option value="knn">K-nearest Neighbors</option>
-                            <option value="svm">Support Vector Machine</option>
-                            <option value="rf">Random Forest</option>
+                            <option value="svm" disabled>Support Vector Machine</option>
+                            <option value="rf" disabled>Random Forest</option>
                         </select>
                     </div>
                 </div>
-                <button py-click="run_simulation" id="run-simulation" onclick="
-                    this.disabled = true;
-                    this.innerHTML = 'Running...';
-                    document.getElementById('toast').classList.remove('hidden');
-                ">Run Simulation</button>
+                <button py-click="run_simulation" id="run-simulation" onclick="runSimulation(this);">Run Simulation</button>
             </div>
         </div>
         <h1>Output</h1>

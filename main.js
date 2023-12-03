@@ -57,3 +57,20 @@ function updateDefaultParameters(datasetName) {
             console.error('There was a problem with the fetch operation:', error);
         });
 };
+
+function runSimulation(obj) {
+    // Remove Skeleton DOMs
+    document.getElementById("matplotlib-output-imbalanced").innerHTML = ""
+    document.getElementById("matplotlib-output-existing-smote").innerHTML = ""
+    document.getElementById("matplotlib-output-heron-centroid-smote").innerHTML = ""
+    document.getElementById("evaluation-output-imbalanced").innerHTML = ""
+    document.getElementById("evaluation-output-existing-smote").innerHTML = ""
+    document.getElementById("evaluation-output-heron-centroid-smote").innerHTML = ""
+    document.getElementById("information-output-imbalanced").innerHTML = ""
+    document.getElementById("information-output-existing-smote").innerHTML = ""
+    document.getElementById("information-output-heron-centroid-smote").innerHTML = ""
+
+    obj.disabled = true;
+    obj.innerHTML = 'Running...';
+    document.getElementById('toast').classList.remove('hidden');
+}

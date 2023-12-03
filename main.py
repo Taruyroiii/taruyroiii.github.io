@@ -150,6 +150,23 @@ async def plot_dataset(titleAppend = '', *args, **kwargs):
     fig
     return fig 
 
+##################### EUCLIDEAN DISTANCE #####################
+
+def euclidean_distance(array1, array2):
+  # Check if the arrays have the same shape
+  if array1.shape != array2.shape:
+    raise ValueError("The arrays must have the same shape")
+  else:
+    # Calculate the squared difference between the arrays
+    squared_diff = np.square(array1 - array2)
+    # Sum up the squared differences
+    sum_squared_diff = np.sum(squared_diff, axis=None)
+    # Take the square root of the sum
+    distance = np.sqrt(sum_squared_diff)
+
+    return distance
+
+
 ##################### HERON-CENTROID SMOTE #####################
 
 async def hercenSMOTE(dataset, doPrint = True):
@@ -183,7 +200,7 @@ async def hercenSMOTE(dataset, doPrint = True):
             distances = []
             # DETERMINE TWO-NEAREST NEIGHBORS OF ALL MINORITY INSTANCES
             for neighbor in range(len(minority)):
-                distance = np.linalg.norm(np.array(instance[data_input_start:data_input_end]) - np.array(minority[neighbor][data_input_start:data_input_end]))
+                distance = euclidean_distance(np.array(instance[data_input_start:data_input_end]), np.array(minority[neighbor][data_input_start:data_input_end]))
                 if distance == 0: continue
                 distances.append((minority[neighbor], distance))
             distances.sort(key=operator.itemgetter(1))
@@ -191,7 +208,7 @@ async def hercenSMOTE(dataset, doPrint = True):
             for i in range(2):
                 neighbors.append(distances[i][0])
             # DISTANCE OF THE TWO NEIGHBORS FROM EACH OTHER
-            twoNeighborsDistance = np.linalg.norm(np.array(neighbors[0][data_input_start:data_input_end]) - np.array(neighbors[1][data_input_start:data_input_end]))
+            twoNeighborsDistance = euclidean_distance(np.array(neighbors[0][data_input_start:data_input_end]), np.array(neighbors[1][data_input_start:data_input_end]))
             # SEMIPERIMETER
             s = (twoNeighborsDistance + distances[0][1] + distances[1][1]) / 2
             # HERON'S FORMULA
@@ -208,14 +225,14 @@ async def hercenSMOTE(dataset, doPrint = True):
         # DETERMINE TWO-NEAREST MAJORITY INSTANCE OF CENTROID
         majorityDistances = []
         for neighbor in range(len(majority)):
-            distance = np.linalg.norm(np.array(centroid[data_input_start:data_input_end]) - np.array(majority[neighbor][data_input_start:data_input_end]))
+            distance = euclidean_distance(np.array(centroid[data_input_start:data_input_end]), np.array(majority[neighbor][data_input_start:data_input_end]))
             majorityDistances.append((majority[neighbor], distance))
         majorityDistances.sort(key=operator.itemgetter(1))
         majorityNeighbors = []
         for i in range(2):
             majorityNeighbors.append(majorityDistances[i][0])
         # DISTANCE OF THE TWO MAJORITY NEIGHBORS FROM EACH OTHER
-        twoMajorityNeighborsDistance = np.linalg.norm(np.array(majorityNeighbors[0][data_input_start:data_input_end]) - np.array(majorityNeighbors[1][data_input_start:data_input_end]))
+        twoMajorityNeighborsDistance = euclidean_distance(np.array(majorityNeighbors[0][data_input_start:data_input_end]), np.array(majorityNeighbors[1][data_input_start:data_input_end]))
         # MAJORITY SEMIPERIMETER
         s = (twoMajorityNeighborsDistance + majorityDistances[0][1] + majorityDistances[1][1]) / 2
         # MAJORITY HERON'S FORMULA
@@ -286,7 +303,7 @@ async def SMOTE(dataset, k = 5, doPrint = True):
         distances = []
         # DETERMINE K-NEAREST NEIGHBORS OF SELECTED MINORITY INSTANCE
         for neighbor in range(len(minority)):
-            distance = np.linalg.norm(np.array(randomInstance[data_input_start:data_input_end]) - np.array(minority[neighbor][data_input_start:data_input_end]))
+            distance = euclidean_distance(np.array(randomInstance[data_input_start:data_input_end]), np.array(minority[neighbor][data_input_start:data_input_end]))
             if distance == 0: continue
             distances.append((minority[neighbor], distance))
         distances.sort(key=operator.itemgetter(1))
@@ -298,10 +315,10 @@ async def SMOTE(dataset, k = 5, doPrint = True):
         # DETERMINE COORDINATE FOR NEW INSTANCE BASED ON CHOSEN NEIGHBOR
         newInstance = [ []*dimensions for i in range(dimensions)]
         for feature in range(dimensions):
-            newInstance[feature] = randomInstance[feature] + (chosenNeighbor[feature] - randomInstance[feature]) * random.random()
-        # ADD NEW INSTANCE
-        #newInstance.insert(0, 0) # EXTRA ID COLUMN
+            newInstance[feature] = randomInstance[feature] + random.random() * (chosenNeighbor[feature] - randomInstance[feature])
+        # ADD CLASSIFICATION
         newInstance.insert(correct_label_index, randomInstance[correct_label_index]) # CLASSIFICATION
+        # ADD MINORITY INSTANCE
         minority.append(newInstance)
         # PRINT IMBALANCE RATIO
         if doPrint: print("\033[1A\033[KIR =", imbalanceRatio)
@@ -387,7 +404,7 @@ def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarge
         distances = []
     
         for i in range(len(input_data) - 1):
-            distance = np.linalg.norm(np.array(data_input) - np.array(input_data[i][data_input_start:data_input_end]))
+            distance = euclidean_distance(np.array(data_input), np.array(input_data[i][data_input_start:data_input_end]))
             distances.append((input_data[i], distance))
         distances.sort(key=operator.itemgetter(1))
         neighbors = []
@@ -567,17 +584,6 @@ def classify_rf(doPrint = True, evalOutputTarget = "output", infoOutputTarget = 
 async def run_simulation(event):
     # Read Parameters
     await read_parameters()
-
-    # Remove Skeleton DOMs
-    document.getElementById("matplotlib-output-imbalanced").innerHTML = ""
-    document.getElementById("matplotlib-output-existing-smote").innerHTML = ""
-    document.getElementById("matplotlib-output-heron-centroid-smote").innerHTML = ""
-    document.getElementById("evaluation-output-imbalanced").innerHTML = ""
-    document.getElementById("evaluation-output-existing-smote").innerHTML = ""
-    document.getElementById("evaluation-output-heron-centroid-smote").innerHTML = ""
-    document.getElementById("information-output-imbalanced").innerHTML = ""
-    document.getElementById("information-output-existing-smote").innerHTML = ""
-    document.getElementById("information-output-heron-centroid-smote").innerHTML = ""
     
     # Imbalanced
     await load_data(await is_preset_checked())
@@ -623,6 +629,7 @@ async def run_simulation(event):
         raise Exception("Invalid classification algorithm mode.")
 
     # Simulation Finished
+    plt.close('all')
     document.getElementById("run-simulation").innerHTML = "Run Simulation"
     document.getElementById("run-simulation").disabled = False
     await hide_toast()
