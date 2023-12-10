@@ -579,6 +579,18 @@ def classify_rf(doPrint = True, evalOutputTarget = "output", infoOutputTarget = 
     display("Average execution time", "%.4f seconds per test run\t\t" % (elapsed_time / test_runs), target = infoOutputTarget)
     display("Total execution time", "%.4f seconds\t\t" % elapsed_time, target = infoOutputTarget)
 
+##################### CLASSIFY #####################
+
+def classify(doPrint, evalOutputTarget, infoOutputTarget):
+    if (classification_algo == "knn"):
+        classify_knn(k = 3, doPrint = doPrint, evalOutputTarget = evalOutputTarget, infoOutputTarget = infoOutputTarget)
+    elif (classification_algo == "svm"):
+        classify_svm(doPrint = doPrint, evalOutputTarget = evalOutputTarget, infoOutputTarget = infoOutputTarget)
+    elif (classification_algo == "rf"):
+        classify_rf(doPrint = doPrint, evalOutputTarget = evalOutputTarget, infoOutputTarget = infoOutputTarget)
+    else:
+        raise Exception("Invalid classification algorithm mode.")
+
 ##################### RUN #####################
 
 async def run_simulation(event):
@@ -591,42 +603,21 @@ async def run_simulation(event):
     await edit_toast_text("Plotting imbalanced data...")
     display(fig, target = 'matplotlib-output-imbalanced')
     await edit_toast_text("Classifying imbalanced data...")
-    if (classification_algo == "knn"):
-        classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-imbalanced", infoOutputTarget = "information-output-imbalanced")
-    elif (classification_algo == "svm"):
-        classify_svm(doPrint = False, evalOutputTarget = "evaluation-output-imbalanced", infoOutputTarget = "information-output-imbalanced")
-    elif (classification_algo == "rf"):
-        classify_rf(doPrint = True, evalOutputTarget = "evaluation-output-imbalanced", infoOutputTarget = "information-output-imbalanced")
-    else:
-        raise Exception("Invalid classification algorithm mode.")
+    classify(doPrint = False, evalOutputTarget = "evaluation-output-imbalanced", infoOutputTarget = "information-output-imbalanced")
 
     # Existing SMOTE
     await load_data(await is_preset_checked())
     await edit_toast_text("Plotting Existing SMOTE data...")
     await SMOTE(grouped_data, doPrint = False)
     await edit_toast_text("Classifying Existing SMOTE data...")
-    if (classification_algo == "knn"):
-        classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-existing-smote", infoOutputTarget = "information-output-existing-smote")
-    elif (classification_algo == "svm"):
-        classify_svm(doPrint = False, evalOutputTarget = "evaluation-output-existing-smote", infoOutputTarget = "information-output-existing-smote")
-    elif (classification_algo == "rf"):
-        classify_rf(doPrint = True, evalOutputTarget = "evaluation-output-existing-smote", infoOutputTarget = "information-output-existing-smote")
-    else:
-        raise Exception("Invalid classification algorithm mode.")
+    classify(doPrint = False, evalOutputTarget = "evaluation-output-existing-smote", infoOutputTarget = "information-output-existing-smote")
 
     # Heron-centroid SMOTE
     await load_data(await is_preset_checked())
     await edit_toast_text("Plotting Heron-Centroid SMOTE data...")
     await hercenSMOTE(grouped_data, doPrint = False)
     await edit_toast_text("Classifying Heron-Centroid SMOTE data...")
-    if (classification_algo == "knn"):
-        classify_knn(k = 3, doPrint = False, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote")
-    elif (classification_algo == "svm"):
-        classify_svm(doPrint = False, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote")
-    elif (classification_algo == "rf"):
-        classify_rf(doPrint = True, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote")
-    else:
-        raise Exception("Invalid classification algorithm mode.")
+    classify(doPrint = False, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote")
 
     # Simulation Finished
     plt.close('all')
