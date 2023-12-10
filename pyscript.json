@@ -4,7 +4,7 @@
         "scikit-learn"
     ],
     "files": {
-        "{DOMAIN}": "http://localhost:5500/",
+        "{DOMAIN}": "https://taruyroiii.github.io/",
         "{PATH}": "",
         "{VERSION}": "",
         "{FROM}": "{DOMAIN}/{PATH}/{VERSION}",
