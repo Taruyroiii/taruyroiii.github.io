@@ -12,12 +12,15 @@ import random
 import operator
 import matplotlib.pyplot as plt
 from sklearn import svm
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 
 train_counts = []
 test_counts = []
 train_data = []
 test_data = []
+majorityCount = 1
+minorityCount = 1
 
 ##################### DOM EDIT #####################
 toast = document.querySelector("#toast")
@@ -90,7 +93,7 @@ async def processFile(file_input):
 ##################### RAW DATA READ #####################
 
 async def load_data(preset_mode = True):
-    global file, grouped_data, minority, majority, train_counts, test_counts, train_data, test_data
+    global file, grouped_data, majorityCount, minorityCount, minority, majority, train_counts, test_counts, train_data, test_data
     
     minority = []
     majority = []
@@ -118,6 +121,18 @@ async def load_data(preset_mode = True):
                 converted_data.append(attr)
         grouped_data[int(converted_data[correct_label_index])].append(converted_data)
 
+    # DETERMINE MAJORITY
+    if len(grouped_data[0]) < len(grouped_data[1]):
+        minority = grouped_data[0]
+        majority = grouped_data[1]
+    else:
+        minority = grouped_data[1]
+        majority = grouped_data[0]
+    
+    # UPDATE COUNT
+    minorityCount = len(minority)
+    majorityCount = len(majority)
+
     # DIVIDE DATA TO TEST AND TRAIN
     for data_group in grouped_data:
         train_counts.append(math.floor(len(data_group) * (1 - test_train_ratio)))
@@ -134,13 +149,13 @@ async def plot_dataset(titleAppend = '', *args, **kwargs):
     global datasetName
     fig, ax = plt.subplots()
 
-    featureM1 = [row[plotF1Index] for row in grouped_data[0]]
-    featureM2 = [row[plotF2Index] for row in grouped_data[0]]
-    featurem1 = [row[plotF1Index] for row in grouped_data[1]]
-    featurem2 = [row[plotF2Index] for row in grouped_data[1]]
+    featureM1 = [row[plotF1Index] for row in majority]
+    featureM2 = [row[plotF2Index] for row in majority]
+    featurem1 = [row[plotF1Index] for row in minority]
+    featurem2 = [row[plotF2Index] for row in minority]
 
-    plt.scatter(featureM1, featureM2, color = 'g')
-    plt.scatter(featurem1, featurem2, color = 'b')
+    plt.scatter(featureM1, featureM2, color = 'b') # Majority is blue
+    plt.scatter(featurem1, featurem2, color = 'g') # Minority is green
     
     plt.xlabel(plotF1Name)
     plt.ylabel(plotF2Name)
@@ -170,6 +185,8 @@ def euclidean_distance(array1, array2):
 ##################### HERON-CENTROID SMOTE #####################
 
 async def hercenSMOTE(dataset, doPrint = True):
+    global majorityCount, minorityCount
+
     if doPrint: print("USING HERON-CENTROID SMOTE: \n")
     minority = []
     majority = []
@@ -250,6 +267,9 @@ async def hercenSMOTE(dataset, doPrint = True):
         areas.pop()
         # PRINT IMBALANCE RATIO
         if doPrint: print("\033[1A\033[KIR =", imbalanceRatio)
+        # UPDATE COUNT
+        majorityCount = len(majority)
+        minorityCount = len(minority)
 
     # DIVIDE DATA TO TEST AND TRAIN
     for data_group in grouped_data:
@@ -276,7 +296,9 @@ async def hercenSMOTE(dataset, doPrint = True):
     
 ##################### EXISTING SMOTE #####################
 
-async def SMOTE(dataset, k = 5, doPrint = True):    
+async def SMOTE(dataset, k = 5, doPrint = True):
+    global majorityCount, minorityCount
+
     if doPrint: print("USING EXISTING SMOTE: \n")
     minority = []
     majority = []
@@ -322,6 +344,9 @@ async def SMOTE(dataset, k = 5, doPrint = True):
         minority.append(newInstance)
         # PRINT IMBALANCE RATIO
         if doPrint: print("\033[1A\033[KIR =", imbalanceRatio)
+        # UPDATE COUNT
+        majorityCount = len(majority)
+        minorityCount = len(minority)
 
     # DIVIDE DATA TO TEST AND TRAIN
     for data_group in grouped_data:
@@ -395,31 +420,15 @@ def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarge
 
     start = time.time()
 
+    knn = KNeighborsClassifier(n_neighbors = k, weights = 'uniform')
+    knn.fit(np.array(input_data)[:, data_input_start:data_input_end], np.array(input_data)[:, correct_label_index])
+
     for test in (range(test_runs)):
         input_data_index = math.floor(np.random.random(size = None) * len(input_data))
         data_input = input_data[input_data_index][data_input_start:data_input_end]
         correct_label = input_data[input_data_index][correct_label_index]
-        best_classification = []
-
-        distances = []
-    
-        for i in range(len(input_data) - 1):
-            distance = euclidean_distance(np.array(data_input), np.array(input_data[i][data_input_start:data_input_end]))
-            distances.append((input_data[i], distance))
-        distances.sort(key=operator.itemgetter(1))
-        neighbors = []
-        for i in range(k):
-            neighbors.append(distances[i][0])
-        class_votes = {}
-        for i in range(len(neighbors)):
-            response = neighbors[i][correct_label_index]
-            if response in class_votes:
-                class_votes[response] += 1
-            else:
-                class_votes[response] = 1
-        sorted_votes = sorted(class_votes.items(), key=operator.itemgetter(1), reverse=True)
-
-        best_classification = sorted_votes[0][0]
+        
+        best_classification = knn.predict(np.array(data_input).reshape(1, -1))
 
         if best_classification == correct_label:
             is_correct = " CORRECT "
@@ -446,15 +455,22 @@ def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarge
     f1_score = calc_f1_score(precision, sensitivity)
     g_mean = calc_g_mean(sensitivity, specificity)
 
-    display("Classification", "K-nearest Neighbors", target = infoOutputTarget)
-    display("K-value", k, target = infoOutputTarget)
+    document.getElementById("classification-info-output").innerHTML = ""
+    display("Classification Algorithm", "K-nearest Neighbors" , target = "classification-info-output")
+    display("K-value", k, target = "classification-info-output")
+    display("Total Classifications", test_runs, target = "classification-info-output")
+
     display("Accuracy", "%.4f%%" % (accuracy * 100), target = evalOutputTarget)
     display("Sensitivity", "%.4f%%" % (sensitivity * 100), target = evalOutputTarget)
     display("Specificity", "%.4f%%" % (specificity * 100), target = evalOutputTarget)
     display("Precision", "%.4f%%" % (precision * 100), target = evalOutputTarget)
     display("F1-Score", "%.4f" % f1_score, target = evalOutputTarget)
     display("G-mean", "%.4f" % g_mean, target = evalOutputTarget)
-    display("Total Tests", test_runs, target = infoOutputTarget)
+    
+    display("Total Instances", (majorityCount + minorityCount), target = infoOutputTarget)
+    display("No. of Majority", majorityCount, target = infoOutputTarget)
+    display("No. of Minority", minorityCount, target = infoOutputTarget)
+    display("Imbalance Ratio", "%.4f" % (majorityCount / minorityCount), target = infoOutputTarget)
     display("Average execution time", "%.4f seconds per test run\t\t" % (elapsed_time / test_runs), target = infoOutputTarget)
     display("Total execution time", "%.4f seconds\t\t" % elapsed_time, target = infoOutputTarget)
 
@@ -507,14 +523,21 @@ def classify_svm(doPrint = True, evalOutputTarget = "output", infoOutputTarget =
     f1_score = calc_f1_score(precision, sensitivity)
     g_mean = calc_g_mean(sensitivity, specificity)
 
-    display("Classification", "Support Vector Machine", target = infoOutputTarget)
+    document.getElementById("classification-info-output").innerHTML = ""
+    display("Classification Algorithm", "Support Vector Machine", target = "classification-info-output")
+    display("Total Classifications", test_runs, target = "classification-info-output")
+
     display("Accuracy", "%.4f%%" % (accuracy * 100), target = evalOutputTarget)
     display("Sensitivity", "%.4f%%" % (sensitivity * 100), target = evalOutputTarget)
     display("Specificity", "%.4f%%" % (specificity * 100), target = evalOutputTarget)
     display("Precision", "%.4f%%" % (precision * 100), target = evalOutputTarget)
     display("F1-Score", "%.4f" % f1_score, target = evalOutputTarget)
     display("G-mean", "%.4f" % g_mean, target = evalOutputTarget)
-    display("Total Tests", test_runs, target = infoOutputTarget)
+    
+    display("Total Instances", (majorityCount + minorityCount), target = infoOutputTarget)
+    display("No. of Majority", majorityCount, target = infoOutputTarget)
+    display("No. of Minority", minorityCount, target = infoOutputTarget)
+    display("Imbalance Ratio", "%.4f" % (majorityCount / minorityCount), target = infoOutputTarget)
     display("Average execution time", "%.4f seconds per test run\t\t" % (elapsed_time / test_runs), target = infoOutputTarget)
     display("Total execution time", "%.4f seconds\t\t" % elapsed_time, target = infoOutputTarget)
 
@@ -568,14 +591,21 @@ def classify_rf(doPrint = True, evalOutputTarget = "output", infoOutputTarget = 
     f1_score = calc_f1_score(precision, sensitivity)
     g_mean = calc_g_mean(sensitivity, specificity)
 
-    display("Classification", "Random Forest", target = infoOutputTarget)
+    document.getElementById("classification-info-output").innerHTML = ""
+    display("Classification Algorithm", "Random Forest", target = "classification-info-output")
+    display("Total Classifications", test_runs, target = "classification-info-output")
+
     display("Accuracy", "%.4f%%" % (accuracy * 100), target = evalOutputTarget)
     display("Sensitivity", "%.4f%%" % (sensitivity * 100), target = evalOutputTarget)
     display("Specificity", "%.4f%%" % (specificity * 100), target = evalOutputTarget)
     display("Precision", "%.4f%%" % (precision * 100), target = evalOutputTarget)
     display("F1-Score", "%.4f" % f1_score, target = evalOutputTarget)
     display("G-mean", "%.4f" % g_mean, target = evalOutputTarget)
-    display("Total Tests", test_runs, target = infoOutputTarget)
+
+    display("Total Instances", (majorityCount + minorityCount), target = infoOutputTarget)
+    display("No. of Majority", majorityCount, target = infoOutputTarget)
+    display("No. of Minority", minorityCount, target = infoOutputTarget)
+    display("Imbalance Ratio", "%.4f" % (majorityCount / minorityCount), target = infoOutputTarget)
     display("Average execution time", "%.4f seconds per test run\t\t" % (elapsed_time / test_runs), target = infoOutputTarget)
     display("Total execution time", "%.4f seconds\t\t" % elapsed_time, target = infoOutputTarget)
 
@@ -596,7 +626,7 @@ def classify(doPrint, evalOutputTarget, infoOutputTarget):
 async def run_simulation(event):
     # Read Parameters
     await read_parameters()
-    
+
     # Imbalanced
     await load_data(await is_preset_checked())
     fig = await plot_dataset(titleAppend = " (Imbalanced)")

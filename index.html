@@ -43,11 +43,11 @@
                             <div class="name">Preset Dataset</div>
                             <select id="input-dataset-preset" onchange="updateDefaultParameters(this.value)"/>
                                 <option value="breast">Wisconsin Breast Cancer</option>
+                                <option value="heart">Heart Attack Risk Prediction</option>
                                 <option value="diabetes">Pima Indians Diabetes</option>
                                 <option value="liver">Indian Liver Patient Records</option>
                                 <option value="parkinsons">Oxford Parkinson's Disease</option>
-                                <option value="cervical">Cervical Cancer Risk Classification</option>
-                                <option value="heart">Heart Attack Risk Prediction</option>
+                                <option value="stroke">Stroke Prediction Dataset</option>
                             </select>
                         </div>
                     </div>
@@ -122,12 +122,31 @@
                         <div class="name">Classification Algorithm</div>
                         <select id="input-classification-algo"/>
                             <option value="knn">K-nearest Neighbors</option>
-                            <option value="svm" disabled>Support Vector Machine</option>
-                            <option value="rf" disabled>Random Forest</option>
+                            <option value="svm">Support Vector Machine</option>
+                            <option value="rf">Random Forest</option>
                         </select>
                     </div>
                 </div>
                 <button py-click="run_simulation" id="run-simulation" onclick="runSimulation(this);">Run Simulation</button>
+            </div>
+        </div>
+        <div class="wrapper output">
+            <h2>Information</h2>
+            <div class="output-wrapper">
+                <div id="matplotlib-legend">
+                    <div class="legend-container" style="height: 100px;">
+                        <h3>Legend</h3>
+                        <div class="legend-row">
+                            <div class="legend-color majority">BLUE</div>
+                            <div class="legend-name">MAJORITY INSTANCES</div>
+                        </div>
+                        <div class="legend-row">
+                            <div class="legend-color minority">GREEN</div>
+                            <div class="legend-name">MINORITY INSTANCES</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="classification-info-output" class="table-output"></div>
             </div>
         </div>
         <h1>Output</h1>

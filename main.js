@@ -15,16 +15,16 @@ function getJSONPath(datasetName) {
     switch (datasetName) {
         case "breast":
             return "./datasets/wdbc.json";
+        case "heart":
+            return "./datasets/heart_attack.json";
         case "diabetes":
             return "./datasets/pima_diabetes.json";
         case "liver":
             return "./datasets/indian_liver.json";
         case "parkinsons":
             return "./datasets/parkinsons.json";
-        case "cervical":
-            return "./datasets/wdbc.json";
-        case "heart":
-            return "./datasets/heart_attack.json";
+        case "stroke":
+            return "./datasets/stroke.json";
         default:
             return "";
     }
@@ -59,7 +59,8 @@ function updateDefaultParameters(datasetName) {
 };
 
 function runSimulation(obj) {
-    // Remove Skeleton DOMs
+    // Remove contents of some DOMs
+    document.getElementById("classification-info-output").innerHTML = ""
     document.getElementById("matplotlib-output-imbalanced").innerHTML = ""
     document.getElementById("matplotlib-output-existing-smote").innerHTML = ""
     document.getElementById("matplotlib-output-heron-centroid-smote").innerHTML = ""

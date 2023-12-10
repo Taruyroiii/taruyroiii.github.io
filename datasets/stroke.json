@@ -1,0 +1,15 @@
+{
+	"name": "Stroke Prediction Dataset",
+	"file_path": "./datasets/stroke.csv",
+	"dimensions": 9,
+	"data_input_start": 0,
+	"data_input_end": -2,
+	"correct_label_index": -1,
+	"plot_f1_index": 6,
+	"plot_f1_Name": "avg_glucose_level",
+	"plot_f2_Index": 7,
+	"plot_f2_Name": "bmi",
+	"labels": 2,
+	"test_train_ratio": 0.2,
+	"classification_runs": 1000
+}
