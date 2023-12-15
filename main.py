@@ -40,7 +40,7 @@ async def edit_toast_text(text = ""):
 ##################### GLOBAL VARIABLES #####################
 
 async def read_parameters():
-    global filePath, datasetName, plotF1Index, plotF1Name, plotF2Index, plotF2Name, correct_label_index, test_train_ratio, classification_algo, centers, is_label_binary, dimensions, data_input_start, data_input_end, test_runs, grouped_data, file
+    global filePath, datasetName, plotF1Index, plotF1Name, plotF2Index, plotF2Name, correct_label_index, test_train_ratio, classification_algo, centers, is_label_binary, dimensions, data_input_start, data_input_end, grouped_data, file
 
     # !!!!!!!! Data File Path !!!!!!!! #
     filePath = document.querySelector("#input-dataset-file-path").value
@@ -65,9 +65,6 @@ async def read_parameters():
     dimensions = int(document.querySelector("#input-dimensions").value)
     data_input_start = int(document.querySelector("#input-data-start-index").value)
     data_input_end = int(document.querySelector("#input-data-end-index").value)
-
-    # AMOUNT OF TEST RUN OF SIMULATIONS TO DO
-    test_runs = int(document.querySelector("#input-test-runs").value)
 
     # FILE
     file = open(filePath, newline = '')
@@ -349,6 +346,8 @@ async def SMOTE(dataset, k = 5, doPrint = True):
         # UPDATE COUNT
         majorityCount = len(majority)
         minorityCount = len(minority) + len(syntheticInstances)
+    
+    minority.extend(syntheticInstances)
 
     # DIVIDE DATA TO TEST AND TRAIN
     for data_group in grouped_data:
@@ -424,6 +423,8 @@ def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarge
 
     knn = KNeighborsClassifier(n_neighbors = k, weights = 'uniform')
     knn.fit(np.array(train_data)[:, data_input_start:data_input_end], np.array(train_data)[:, correct_label_index])
+
+    test_runs = len(input_data)
 
     for test in (range(test_runs)):
         input_data_index = math.floor(np.random.random(size = None) * len(input_data))
@@ -501,6 +502,8 @@ def classify_svm(doPrint = True, evalOutputTarget = "output", infoOutputTarget =
     svm_classify = svm.SVC()
     svm_classify.fit(np.array(train_data)[:, data_input_start:data_input_end], np.array(train_data)[:, correct_label_index])
 
+    test_runs = len(input_data)
+
     for test in (range(test_runs)):
         input_data_index = math.floor(np.random.random(size = None) * len(input_data))
         data_input = input_data[input_data_index][data_input_start:data_input_end]
@@ -574,6 +577,8 @@ def classify_rf(doPrint = True, evalOutputTarget = "output", infoOutputTarget = 
         
     rf_classify = RandomForestClassifier(n_estimators=100, max_depth=None, random_state=42)
     rf_classify.fit(np.array(train_data)[:, data_input_start:data_input_end], np.array(train_data)[:, correct_label_index])
+
+    test_runs = len(input_data)
 
     for test in (range(test_runs)):
         input_data_index = math.floor(np.random.random(size = None) * len(input_data))
@@ -662,7 +667,7 @@ async def run_simulation(event):
     # Existing SMOTE
     await load_data(await is_preset_checked())
     await edit_toast_text("Plotting Existing SMOTE data...")
-    await SMOTE(grouped_data, doPrint = True)
+    await SMOTE(grouped_data, doPrint = False)
     await edit_toast_text("Classifying Existing SMOTE data...")
     display("Existing SMOTE", target = "summarized-output-existing-smote")
     classify(doPrint = False, evalOutputTarget = "evaluation-output-existing-smote", infoOutputTarget = "information-output-existing-smote", summarizedOutputTarget = "summarized-output-existing-smote")
@@ -670,7 +675,7 @@ async def run_simulation(event):
     # Heron-centroid SMOTE
     await load_data(await is_preset_checked())
     await edit_toast_text("Plotting Heron-Centroid SMOTE data...")
-    await hercenSMOTE(grouped_data, doPrint = True)
+    await hercenSMOTE(grouped_data, doPrint = False)
     await edit_toast_text("Classifying Heron-Centroid SMOTE data...")
     display("Heron-Centroid SMOTE", target = "summarized-output-heron-centroid-smote")
     classify(doPrint = False, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote", summarizedOutputTarget = "summarized-output-heron-centroid-smote")
