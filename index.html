@@ -130,8 +130,8 @@
                 <button py-click="run_simulation" id="run-simulation" onclick="runSimulation(this);">Run Simulation</button>
             </div>
         </div>
+        <h1>Information</h1>
         <div class="wrapper output">
-            <h2>Information</h2>
             <div class="output-wrapper">
                 <div id="matplotlib-legend">
                     <div class="legend-container" style="height: 100px;">
@@ -147,6 +147,25 @@
                     </div>
                 </div>
                 <div id="classification-info-output" class="table-output"></div>
+            </div>
+        </div>
+        <h1>Summary</h1>
+        <div class="wrapper output">
+            <div class="table-summary"></div>
+            <div id="summarized-output-skeleton" class="skeleton container" style="width: 100%;"></div>
+            <div id="summarized-output" class="table-output" style="display: none;">
+                <div class="table-output-row heading">
+                    <div>Balancing Method</div>
+                    <div>Accuracy</div>
+                    <div>Sensitivity</div>
+                    <div>Specificity</div>
+                    <div>Precision</div>
+                    <div>F1-Score</div>
+                    <div>G-mean</div>
+                </div>
+                <div id="summarized-output-imbalanced" class="table-output-row"></div>
+                <div id="summarized-output-existing-smote" class="table-output-row"></div>
+                <div id="summarized-output-heron-centroid-smote" class="table-output-row"></div>
             </div>
         </div>
         <h1>Output</h1>

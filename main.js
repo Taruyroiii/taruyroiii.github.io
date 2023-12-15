@@ -59,11 +59,18 @@ function updateDefaultParameters(datasetName) {
 };
 
 function runSimulation(obj) {
+    // Make Summarized Output Appear
+    document.getElementById("summarized-output").style.display = null;
+    document.getElementById("summarized-output-skeleton").style.display = "none";
+
     // Remove contents of some DOMs
     document.getElementById("classification-info-output").innerHTML = ""
     document.getElementById("matplotlib-output-imbalanced").innerHTML = ""
     document.getElementById("matplotlib-output-existing-smote").innerHTML = ""
     document.getElementById("matplotlib-output-heron-centroid-smote").innerHTML = ""
+    document.getElementById("summarized-output-imbalanced").innerHTML = ""
+    document.getElementById("summarized-output-existing-smote").innerHTML = ""
+    document.getElementById("summarized-output-heron-centroid-smote").innerHTML = ""
     document.getElementById("evaluation-output-imbalanced").innerHTML = ""
     document.getElementById("evaluation-output-existing-smote").innerHTML = ""
     document.getElementById("evaluation-output-heron-centroid-smote").innerHTML = ""

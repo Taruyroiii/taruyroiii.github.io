@@ -266,7 +266,7 @@ async def hercenSMOTE(dataset, doPrint = True):
         # REMOVE LARGEST AREA AS IT IS RESOLVED
         areas.pop()
         # PRINT IMBALANCE RATIO
-        if doPrint: print("\033[1A\033[KIR =", imbalanceRatio)
+        if doPrint: print("IR =", imbalanceRatio)
         # UPDATE COUNT
         majorityCount = len(majority)
         minorityCount = len(minority)
@@ -316,10 +316,12 @@ async def SMOTE(dataset, k = 5, doPrint = True):
         minority = dataset[1]
         majority = dataset[0]
 
+    syntheticInstances = []
+
     # SMOTE ALGORITHM
     while imbalanceRatio > 1.0:
         # DETERMINE IMBALANCE RATIO
-        imbalanceRatio = len(majority)/len(minority)
+        imbalanceRatio = len(majority)/(len(minority) + len(syntheticInstances))
         # DETERMINE RANDOM MINORITY INSTANCE
         randomInstance = minority[random.randint(0, len(minority) - 1)]
         distances = []
@@ -341,12 +343,12 @@ async def SMOTE(dataset, k = 5, doPrint = True):
         # ADD CLASSIFICATION
         newInstance.insert(correct_label_index, randomInstance[correct_label_index]) # CLASSIFICATION
         # ADD MINORITY INSTANCE
-        minority.append(newInstance)
+        syntheticInstances.append(newInstance)
         # PRINT IMBALANCE RATIO
-        if doPrint: print("\033[1A\033[KIR =", imbalanceRatio)
+        if doPrint: print("IR =", imbalanceRatio)
         # UPDATE COUNT
         majorityCount = len(majority)
-        minorityCount = len(minority)
+        minorityCount = len(minority) + len(syntheticInstances)
 
     # DIVIDE DATA TO TEST AND TRAIN
     for data_group in grouped_data:
@@ -407,7 +409,7 @@ def calc_g_mean(sensitivity, specificity):
 
 ##################### K-NEAREST NEIGHBORS #####################
 
-def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarget = "output"):
+def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarget = "output", summarizedOutputTarget = "output"):
     true_pos = 0
     true_neg = 0
     false_pos = 0
@@ -421,7 +423,7 @@ def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarge
     start = time.time()
 
     knn = KNeighborsClassifier(n_neighbors = k, weights = 'uniform')
-    knn.fit(np.array(input_data)[:, data_input_start:data_input_end], np.array(input_data)[:, correct_label_index])
+    knn.fit(np.array(train_data)[:, data_input_start:data_input_end], np.array(train_data)[:, correct_label_index])
 
     for test in (range(test_runs)):
         input_data_index = math.floor(np.random.random(size = None) * len(input_data))
@@ -466,6 +468,13 @@ def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarge
     display("Precision", "%.4f%%" % (precision * 100), target = evalOutputTarget)
     display("F1-Score", "%.4f" % f1_score, target = evalOutputTarget)
     display("G-mean", "%.4f" % g_mean, target = evalOutputTarget)
+
+    display("%.4f%%" % (accuracy * 100), target = summarizedOutputTarget)
+    display("%.4f%%" % (sensitivity * 100), target = summarizedOutputTarget)
+    display("%.4f%%" % (specificity * 100), target = summarizedOutputTarget)
+    display("%.4f%%" % (precision * 100), target = summarizedOutputTarget)
+    display("%.4f" % f1_score, target = summarizedOutputTarget)
+    display("%.4f" % g_mean, target = summarizedOutputTarget)
     
     display("Total Instances", (majorityCount + minorityCount), target = infoOutputTarget)
     display("No. of Majority", majorityCount, target = infoOutputTarget)
@@ -476,7 +485,7 @@ def classify_knn(k, doPrint = True, evalOutputTarget = "output", infoOutputTarge
 
 ##################### SVM #####################
 
-def classify_svm(doPrint = True, evalOutputTarget = "output", infoOutputTarget = "output"):
+def classify_svm(doPrint = True, evalOutputTarget = "output", infoOutputTarget = "output", summarizedOutputTarget = "output"):
     true_pos = 0
     true_neg = 0
     false_pos = 0
@@ -490,7 +499,7 @@ def classify_svm(doPrint = True, evalOutputTarget = "output", infoOutputTarget =
     start = time.time()
         
     svm_classify = svm.SVC()
-    svm_classify.fit(np.array(input_data)[:, data_input_start:data_input_end], np.array(input_data)[:, correct_label_index])
+    svm_classify.fit(np.array(train_data)[:, data_input_start:data_input_end], np.array(train_data)[:, correct_label_index])
 
     for test in (range(test_runs)):
         input_data_index = math.floor(np.random.random(size = None) * len(input_data))
@@ -533,6 +542,13 @@ def classify_svm(doPrint = True, evalOutputTarget = "output", infoOutputTarget =
     display("Precision", "%.4f%%" % (precision * 100), target = evalOutputTarget)
     display("F1-Score", "%.4f" % f1_score, target = evalOutputTarget)
     display("G-mean", "%.4f" % g_mean, target = evalOutputTarget)
+
+    display("%.4f%%" % (accuracy * 100), target = summarizedOutputTarget)
+    display("%.4f%%" % (sensitivity * 100), target = summarizedOutputTarget)
+    display("%.4f%%" % (specificity * 100), target = summarizedOutputTarget)
+    display("%.4f%%" % (precision * 100), target = summarizedOutputTarget)
+    display("%.4f" % f1_score, target = summarizedOutputTarget)
+    display("%.4f" % g_mean, target = summarizedOutputTarget)
     
     display("Total Instances", (majorityCount + minorityCount), target = infoOutputTarget)
     display("No. of Majority", majorityCount, target = infoOutputTarget)
@@ -543,7 +559,7 @@ def classify_svm(doPrint = True, evalOutputTarget = "output", infoOutputTarget =
 
 ##################### RANDOM FOREST #####################
 
-def classify_rf(doPrint = True, evalOutputTarget = "output", infoOutputTarget = "output"):
+def classify_rf(doPrint = True, evalOutputTarget = "output", infoOutputTarget = "output", summarizedOutputTarget = "output"):
     true_pos = 0
     true_neg = 0
     false_pos = 0
@@ -557,7 +573,7 @@ def classify_rf(doPrint = True, evalOutputTarget = "output", infoOutputTarget = 
     start = time.time()
         
     rf_classify = RandomForestClassifier(n_estimators=100, max_depth=None, random_state=42)
-    rf_classify.fit(np.array(input_data)[:, data_input_start:data_input_end], np.array(input_data)[:, correct_label_index])
+    rf_classify.fit(np.array(train_data)[:, data_input_start:data_input_end], np.array(train_data)[:, correct_label_index])
 
     for test in (range(test_runs)):
         input_data_index = math.floor(np.random.random(size = None) * len(input_data))
@@ -602,6 +618,13 @@ def classify_rf(doPrint = True, evalOutputTarget = "output", infoOutputTarget = 
     display("F1-Score", "%.4f" % f1_score, target = evalOutputTarget)
     display("G-mean", "%.4f" % g_mean, target = evalOutputTarget)
 
+    display("%.4f%%" % (accuracy * 100), target = summarizedOutputTarget)
+    display("%.4f%%" % (sensitivity * 100), target = summarizedOutputTarget)
+    display("%.4f%%" % (specificity * 100), target = summarizedOutputTarget)
+    display("%.4f%%" % (precision * 100), target = summarizedOutputTarget)
+    display("%.4f" % f1_score, target = summarizedOutputTarget)
+    display("%.4f" % g_mean, target = summarizedOutputTarget)
+
     display("Total Instances", (majorityCount + minorityCount), target = infoOutputTarget)
     display("No. of Majority", majorityCount, target = infoOutputTarget)
     display("No. of Minority", minorityCount, target = infoOutputTarget)
@@ -611,13 +634,13 @@ def classify_rf(doPrint = True, evalOutputTarget = "output", infoOutputTarget = 
 
 ##################### CLASSIFY #####################
 
-def classify(doPrint, evalOutputTarget, infoOutputTarget):
+def classify(doPrint, evalOutputTarget, infoOutputTarget, summarizedOutputTarget):
     if (classification_algo == "knn"):
-        classify_knn(k = 3, doPrint = doPrint, evalOutputTarget = evalOutputTarget, infoOutputTarget = infoOutputTarget)
+        classify_knn(k = 3, doPrint = doPrint, evalOutputTarget = evalOutputTarget, infoOutputTarget = infoOutputTarget, summarizedOutputTarget = summarizedOutputTarget)
     elif (classification_algo == "svm"):
-        classify_svm(doPrint = doPrint, evalOutputTarget = evalOutputTarget, infoOutputTarget = infoOutputTarget)
+        classify_svm(doPrint = doPrint, evalOutputTarget = evalOutputTarget, infoOutputTarget = infoOutputTarget, summarizedOutputTarget = summarizedOutputTarget)
     elif (classification_algo == "rf"):
-        classify_rf(doPrint = doPrint, evalOutputTarget = evalOutputTarget, infoOutputTarget = infoOutputTarget)
+        classify_rf(doPrint = doPrint, evalOutputTarget = evalOutputTarget, infoOutputTarget = infoOutputTarget, summarizedOutputTarget = summarizedOutputTarget)
     else:
         raise Exception("Invalid classification algorithm mode.")
 
@@ -633,21 +656,24 @@ async def run_simulation(event):
     await edit_toast_text("Plotting imbalanced data...")
     display(fig, target = 'matplotlib-output-imbalanced')
     await edit_toast_text("Classifying imbalanced data...")
-    classify(doPrint = False, evalOutputTarget = "evaluation-output-imbalanced", infoOutputTarget = "information-output-imbalanced")
+    display("Imbalanced", target = "summarized-output-imbalanced")
+    classify(doPrint = False, evalOutputTarget = "evaluation-output-imbalanced", infoOutputTarget = "information-output-imbalanced", summarizedOutputTarget = "summarized-output-imbalanced")
 
     # Existing SMOTE
     await load_data(await is_preset_checked())
     await edit_toast_text("Plotting Existing SMOTE data...")
-    await SMOTE(grouped_data, doPrint = False)
+    await SMOTE(grouped_data, doPrint = True)
     await edit_toast_text("Classifying Existing SMOTE data...")
-    classify(doPrint = False, evalOutputTarget = "evaluation-output-existing-smote", infoOutputTarget = "information-output-existing-smote")
+    display("Existing SMOTE", target = "summarized-output-existing-smote")
+    classify(doPrint = False, evalOutputTarget = "evaluation-output-existing-smote", infoOutputTarget = "information-output-existing-smote", summarizedOutputTarget = "summarized-output-existing-smote")
 
     # Heron-centroid SMOTE
     await load_data(await is_preset_checked())
     await edit_toast_text("Plotting Heron-Centroid SMOTE data...")
-    await hercenSMOTE(grouped_data, doPrint = False)
+    await hercenSMOTE(grouped_data, doPrint = True)
     await edit_toast_text("Classifying Heron-Centroid SMOTE data...")
-    classify(doPrint = False, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote")
+    display("Heron-Centroid SMOTE", target = "summarized-output-heron-centroid-smote")
+    classify(doPrint = False, evalOutputTarget = "evaluation-output-heron-centroid-smote", infoOutputTarget = "information-output-heron-centroid-smote", summarizedOutputTarget = "summarized-output-heron-centroid-smote")
 
     # Simulation Finished
     plt.close('all')
