@@ -11,5 +11,6 @@
 	"plot_f2_Name": "compactness1",
 	"labels": 2,
 	"test_train_ratio": 0.2,
+	"data_points": 569,
 	"classification_runs": 1000
 }

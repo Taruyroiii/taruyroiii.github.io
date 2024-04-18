@@ -51,6 +51,8 @@ function updateDefaultParameters(datasetName) {
             document.getElementById("input-plot-f2-name").value = data.plot_f2_Name
             document.getElementById("input-centers").value = data.labels
             document.getElementById("input-test-train-ratio").value = data.test_train_ratio
+            document.getElementById("input-data-points").value = data.data_points
+            document.getElementById("input-data-points").max = data.data_points
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
