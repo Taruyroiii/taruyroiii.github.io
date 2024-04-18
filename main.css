@@ -49,6 +49,10 @@ h2 {
     font-weight: bold;
 }
 
+.py-error {
+    display: none;
+}
+
 #toast {
     position: fixed;
     bottom: 4%;

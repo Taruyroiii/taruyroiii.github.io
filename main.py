@@ -6,6 +6,7 @@ from pyscript import when, display
 
 import numpy as np
 import csv
+import copy
 import time
 import math
 import random
@@ -40,7 +41,7 @@ async def edit_toast_text(text = ""):
 ##################### GLOBAL VARIABLES #####################
 
 async def read_parameters():
-    global filePath, datasetName, plotF1Index, plotF1Name, plotF2Index, plotF2Name, correct_label_index, test_train_ratio, classification_algo, centers, is_label_binary, dimensions, data_input_start, data_input_end, grouped_data, file
+    global filePath, datasetName, plotF1Index, plotF1Name, plotF2Index, plotF2Name, correct_label_index, test_train_ratio, data_points, classification_algo, centers, is_label_binary, dimensions, data_input_start, data_input_end, grouped_data, saved_data, file
 
     # !!!!!!!! Data File Path !!!!!!!! #
     filePath = document.querySelector("#input-dataset-file-path").value
@@ -55,6 +56,7 @@ async def read_parameters():
 
     # !!!!!!!! Test/Train Data !!!!!!!! #
     test_train_ratio = float(document.querySelector("#input-test-train-ratio").value)
+    data_points = float(document.querySelector("#input-data-points").value)
     classification_algo = document.querySelector("#input-classification-algo").value
 
     # AMOUNT OF CLASSIFICATIONS OR LABELS
@@ -69,6 +71,7 @@ async def read_parameters():
     # FILE
     file = open(filePath, newline = '')
     grouped_data = [ []*centers for i in range(centers)]
+    saved_data = [ []*centers for i in range(centers)]
 
 ##################### CUSTOM DATA READ #####################
 
@@ -90,7 +93,7 @@ async def processFile(file_input):
 ##################### RAW DATA READ #####################
 
 async def load_data(preset_mode = True):
-    global file, grouped_data, majorityCount, minorityCount, minority, majority, train_counts, test_counts, train_data, test_data
+    global file, grouped_data, saved_data, majorityCount, minorityCount, minority, majority, train_counts, test_counts, train_data, test_data, newSimulation
     
     minority = []
     majority = []
@@ -99,24 +102,45 @@ async def load_data(preset_mode = True):
     train_data = []
     test_data = []
 
-    if preset_mode:
-        file = open(filePath, newline = '')
-    else:
-        file_input = document.getElementById('input-dataset-file').files.item(0)
-        file = await processFile(file_input)
+    if newSimulation:
+        if preset_mode:
+            file = open(filePath, newline = '')
+        else:
+            file_input = document.getElementById('input-dataset-file').files.item(0)
+            file = await processFile(file_input)
 
-    raw_data = csv.reader(file, delimiter = ',')
-    grouped_data = [ []*centers for i in range(centers)]
+        raw_data = csv.reader(file, delimiter = ',')
+        saved_data = [ []*centers for i in range(centers)]
 
-    # SEPARATE CLASSES, RESOLVE NON-INTEGER BINARY CLASSIFICATION
-    for row in raw_data:
-        converted_data = []
-        for attr in row:
-            try:
-                converted_data.append(float(attr))
-            except:
-                converted_data.append(attr)
-        grouped_data[int(converted_data[correct_label_index])].append(converted_data)
+        # SEPARATE CLASSES, RESOLVE NON-INTEGER BINARY CLASSIFICATION
+        for row in raw_data:
+            converted_data = []
+            for attr in row:
+                try:
+                    converted_data.append(float(attr))
+                except:
+                    converted_data.append(attr)
+            saved_data[int(converted_data[correct_label_index])].append(converted_data)
+
+        # RANDOMLY SELECT DATA POINTS BASED ON INPUTTED COUNT
+        random.shuffle(saved_data[0])
+        random.shuffle(saved_data[1])
+
+        # CALCULATE HOW MUCH POINTS TO GET BASED ON GROUPED DATA RATIO
+        dataPointCount_0 = len(saved_data[0])
+        dataPointCount_1 = len(saved_data[1])
+        totalCount = dataPointCount_0 + dataPointCount_1
+        datasetSizeFactor = totalCount / data_points
+        newCount_0 = math.floor(dataPointCount_0 / datasetSizeFactor)
+        newCount_1 = math.ceil(dataPointCount_1 / datasetSizeFactor)
+
+        saved_data[0] = saved_data[0][0:newCount_0]
+        saved_data[1] = saved_data[1][0:newCount_1]
+
+        # SET FLAG
+        newSimulation = False
+
+    grouped_data = copy.deepcopy(saved_data)
 
     # DETERMINE MAJORITY
     if len(grouped_data[0]) < len(grouped_data[1]):
@@ -652,6 +676,9 @@ def classify(doPrint, evalOutputTarget, infoOutputTarget, summarizedOutputTarget
 ##################### RUN #####################
 
 async def run_simulation(event):
+    global grouped_data, saved_data, newSimulation
+    newSimulation = True
+
     # Read Parameters
     await read_parameters()
 
