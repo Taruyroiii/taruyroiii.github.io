@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SMOTE Modification</title>
+        <script src="./mini-coi.js"></script>
+        <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+        <link rel="stylesheet" href="heron-centroid-smote.css"/>
+        <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css"/>
+        <script defer type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+        <script type="text/javascript" src="heron-centroid-smote.js"></script>
+    </head>
+    <body>
+        <script type="py" src="./heron-centroid-smote.py" config="./pyscript.json" target="output"></script>
+        <div id="toast">
+            <div id="toast-logo">
+                <div class="lds-ripple"><div></div><div></div></div>
+            </div>
+            <div id="toast-text">Loading...</div>
+        </div>
+        <div style="display: flex; flex-direction: row; align-items: center;">
+            <a href="../index.html" style="padding-right: 20px;"><button>◀ BACK</button></a>
+            <h1>Heron-Centroid SMOTE Application</h1>
+        </div>
+        <hr>
+        <h1>Parameters</h1>
+        <div class="wrapper settings">
+            <div class="parameters">
+                <div class="heading">
+                    <div class="name">Dataset Characteristics</div>
+                    <div class="heading-switch">
+                        <span>Preset datasets</span>
+                        <label class="switch">
+                            <input id="preset-dataset-input" type="checkbox" onclick="updateDatasetInputData(this.checked);" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="parameter-group">
+                    <div class="parameter-group">
+                        <div id="mode-custom" class="parameter" style="display: none;">
+                            <div class="name">Custom Dataset File</div>
+                            <input id="input-dataset-file" type="file"/>
+                        </div>
+                        <input id="input-dataset-file-path" value="./datasets/wdbc.data" readonly style="display: none;"/>
+                        <div id="mode-preset" class="parameter">
+                            <div class="name">Preset Dataset</div>
+                            <select id="input-dataset-preset" onchange="updateDefaultParameters(this.value)"/>
+                                <option value="breast">Wisconsin Breast Cancer</option>
+                                <option value="heart">Heart Attack Risk Prediction</option>
+                                <option value="diabetes">Pima Indians Diabetes</option>
+                                <option value="liver">Indian Liver Patient Records</option>
+                                <option value="parkinsons">Oxford Parkinson's Disease</option>
+                                <option value="stroke">Stroke Prediction Dataset</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Dataset Name</div>
+                        <input id="input-dataset-name" type="text" placeholder="Dataset Name" value="Wisconsin Breast Cancer"/>
+                    </div>
+                </div>
+                <div class="parameter-group">
+                    <div class="parameter">
+                        <div class="name">Dimensions</div>
+                        <input id="input-dimensions" type="number" placeholder="Dimensions" min="2" value="30"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Dataset Start Index</div>
+                        <input id="input-data-start-index" type="number" placeholder="Dataset Start Index" value="0"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Dataset End Index</div>
+                        <input id="input-data-end-index" type="number" placeholder="Dataset End Index" value="-2"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Correct Label Index</div>
+                        <input id="input-correct-label-index" type="number" placeholder="Correct Label Index" value="-1"/>
+                    </div>
+                </div>
+                <div class="heading">
+                    <div class="name">Scatter Plot Properties</div>
+                </div>
+                <div class="parameter-group">
+                    <div class="parameter">
+                        <div class="name">Plot Feature X Axis</div>
+                        <input id="input-plot-f1-index" type="number" placeholder="Plot Feature X Axis" value="3"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Feature X Name</div>
+                        <input id="input-plot-f1-name" type="text" placeholder="Feature X Name" value="area1"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Plot Feature Y Axis</div>
+                        <input id="input-plot-f2-index" type="number" placeholder="Plot Feature Y Axis" value="5"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Feature Y Name</div>
+                        <input id="input-plot-f2-name" type="text" placeholder="Feature Y Name" value="compactness1"/>
+                    </div>
+                </div>
+                <div class="heading">
+                    <div class="name">Simulation Settings</div>
+                    <div class="heading-switch">
+                        <span>Use test data as input</span>
+                        <label class="switch">
+                            <input id="test-dataset-input" type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="parameter-group">
+                    <div class="parameter" style="display: none;">
+                        <div class="name">Labels/Centers</div>
+                        <input id="input-centers" type="number" placeholder="Labels/Centers" min="2" value="2"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Test/Train Ratio</div>
+                        <input id="input-test-train-ratio" type="number" placeholder="Test/Train Ratio" step="0.05" min="0.00" max="1.00" value="0.2"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Amount of Data Points</div>
+                        <input id="input-data-points" type="number" placeholder="Data Points" min="5" value="569" max="569"/>
+                    </div>
+                    <div class="parameter" style="display: none;">
+                        <div class="name">Classification Runs</div>
+                        <input id="input-test-runs" type="number" placeholder="Classification Runs" min="1" value="1000"/>
+                    </div>
+                    <div class="parameter">
+                        <div class="name">Classification Algorithm</div>
+                        <select id="input-classification-algo"/>
+                            <option value="knn">K-nearest Neighbors</option>
+                            <option value="svm">Support Vector Machine</option>
+                            <option value="rf">Random Forest</option>
+                        </select>
+                    </div>
+                </div>
+                <button py-click="run_simulation" id="run-simulation" onclick="runSimulation(this);">Run Simulation</button>
+            </div>
+        </div>
+        <h1>Summary</h1>
+        <div class="wrapper output">
+            <div class="table-summary"></div>
+            <div id="summarized-output-skeleton" class="skeleton container" style="width: 100%; height: 15ch;"></div>
+            <div id="summarized-output" class="table-output" style="display: none;">
+                <div class="table-output-row heading">
+                    <div>Balancing Method</div>
+                    <div>Accuracy</div>
+                    <div>Sensitivity</div>
+                    <div>Specificity</div>
+                    <div>Precision</div>
+                    <div>F1-Score</div>
+                    <div>G-mean</div>
+                </div>
+                <div id="summarized-output-imbalanced" class="table-output-row"></div>
+                <div id="summarized-output-existing-smote" class="table-output-row"></div>
+                <div id="summarized-output-heron-centroid-smote" class="table-output-row"></div>
+            </div>
+        </div>
+        <h1>Information</h1>
+        <div class="wrapper output">
+            <div class="output-wrapper">
+                <div id="matplotlib-legend">
+                    <div class="legend-container" style="height: 100px;">
+                        <h3>Legend</h3>
+                        <div class="legend-row">
+                            <div class="legend-color majority">BLUE</div>
+                            <div class="legend-name">MAJORITY INSTANCES</div>
+                        </div>
+                        <div class="legend-row">
+                            <div class="legend-color minority">GREEN</div>
+                            <div class="legend-name">MINORITY INSTANCES</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="classification-info-output" class="table-output"></div>
+            </div>
+        </div>
+        <h1>Output</h1>
+        <div class="wrapper output">
+            <h2>Imbalanced dataset</h2>
+            <div class="output-wrapper">
+                <div id="matplotlib-output-imbalanced">
+                    <div class="skeleton container"></div>
+                </div>
+                <div id="evaluation-output-imbalanced" class="table-output"></div>
+                <div id="information-output-imbalanced" class="table-output"></div>
+            </div>
+            <h2>Balanced dataset using existing SMOTE</h2>
+            <div class="output-wrapper">
+                <div id="matplotlib-output-existing-smote">
+                    <div class="skeleton container"></div>
+                </div>
+                <div id="evaluation-output-existing-smote" class="table-output"></div>
+                <div id="information-output-existing-smote" class="table-output"></div>
+            </div>
+            <h2>Balanced dataset using Heron-Centroid SMOTE</h2>
+            <div class="output-wrapper">
+                <div id="matplotlib-output-heron-centroid-smote">
+                    <div class="skeleton container"></div>
+                </div>
+                <div id="evaluation-output-heron-centroid-smote" class="table-output"></div>
+                <div id="information-output-heron-centroid-smote" class="table-output"></div>
+            </div>
+        </div>
+        <div id="output"></div>
+    </body>
+</html>
