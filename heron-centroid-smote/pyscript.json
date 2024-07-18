@@ -4,7 +4,7 @@
         "scikit-learn"
     ],
     "files": {
-        "{DOMAIN}": "https://taruyroiii.github.io/",
+        "{DOMAIN}": "https://taruyroiii.github.io/heron-centroid-smote/",
         "{PATH}": "",
         "{VERSION}": "",
         "{FROM}": "{DOMAIN}/{PATH}/{VERSION}",
