@@ -1,0 +1,196 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root {
+    --font: Poppins;
+    --main-bg: rgb(247, 241, 250);
+    --main-text: rgb(15, 15, 20);
+    --accent: rgb(194, 187, 255);
+    --accent-text: rgb(19, 17, 36);
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--main-bg);
+    color: var(--main-text);
+    font-family: var(--font);
+}
+
+#header {
+    --padding-x: 8em;
+    position: sticky;
+    top: 0;
+    height: 2em;
+    padding: 1em var(--padding-x);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: space-between;
+    box-shadow: 0px 1px 10px 0px rgba(21, 21, 22, 0.333);
+    background-color: rgba(21, 21, 22, 0.058);
+    z-index: 999;
+}
+
+#header > div {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+}
+
+#header > #navigation {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-end;
+    justify-content: center;
+    height: 100%;
+}
+
+#navigation > .nav-item {
+    line-height: 2em;
+    margin: 0 1em;
+    padding: 0 1em;
+    border-radius: 2em;
+    transition: ease-in-out 0.1s;
+}
+
+#navigation > .nav-item:hover {
+    background-color: var(--accent);
+    color: var(--accent-text);
+    cursor: not-allowed;
+}
+
+#front-cover {
+    padding: 2em 4em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+}
+
+#front-cover > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+}
+
+#front-cover > #front-feature {
+    background-color: var(--accent);
+    border-radius: 100%;
+    margin-right: 4em;
+}
+
+#front-cover > #front-greeting {
+    font-size: 3em;
+    font-weight: 600;
+    width: max-content;
+}
+
+#front-notice {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    text-align: center;
+    background-color: var(--accent);
+    color: var(--accent-text);
+    padding: 2em 8em;
+    box-shadow: inset 0px 0px 10px 0px rgba(21, 21, 22, 0.333);
+    font-size: 1.25em;
+}
+
+.main-body {
+    padding: 2em 8em;
+}
+
+.main-body > .content-group {
+    margin-bottom: 2em;
+}
+
+.content-group > .heading {
+    position: relative;
+    font-size: 2em;
+    font-weight: 500;
+    padding: 0.25em 0em;
+}
+
+.content-group > .heading::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--main-text);
+}
+
+.content-group > .content {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 2em 1em 0 1em;
+}
+
+.content > .content-image {
+    padding-right: 2em;
+}
+
+.content-image img {
+    height: 300px;
+    width: 400px;
+    object-fit: cover;
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+.content > .content-text {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.content-text > * {
+    margin: 0.5em 0;
+}
+
+.content-text > .title {
+    font-weight: 500;
+    font-size: 1.5em;
+}
+
+.content-text > .description {
+    opacity: 0.9;
+}
+
+.button {
+    background-color: var(--accent);
+    color: var(--accent-text);
+    border-radius: 2em;
+    padding: 0.5em 2em;
+    text-decoration: none;
+    transition: ease-in-out 0.1s;
+}
+
+.button:hover {
+    opacity: 0.9;
+}
+
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --main-bg: rgb(15, 15, 20);
+        --main-text: rgb(232, 232, 232);
+    }
+
+    #header {
+        background-color: rgba(16, 16, 19, 0.901);
+    }
+}
